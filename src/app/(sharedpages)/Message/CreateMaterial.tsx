@@ -2,18 +2,24 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { MultiSelect } from "@/components/ui/Multi-select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog as CalendarDialog,
+  DialogContent as CalendarDialogContent,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 export default function CreateMaterial() {
   const { data: session } = useSession();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [expiresAt, setExpiresAt] = useState<Date | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [explicitUsers, setExplicitUsers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -61,68 +67,69 @@ export default function CreateMaterial() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 flex items-center justify-center p-4 sm:p-6">
-      <div className="bg-white w-full max-w-md sm:max-w-lg rounded-xl shadow-md p-6 sm:p-8 space-y-5 border border-indigo-200">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-md p-6 space-y-6 border border-indigo-200">
         <h1 className="text-2xl font-bold text-indigo-700 text-center">
           Create New Material
         </h1>
 
-        <div className="space-y-4">
-          {/* Title input */}
+        <div className="space-y-4 flex flex-col items-center">
+          {/* Title */}
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter title"
             disabled={submitting}
+            className="w-full max-w-sm"
           />
 
-          {/* Content textarea */}
+          {/* Content */}
           <Textarea
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Write your content here..."
-            className="min-h-[120px]"
+            className="min-h-[100px] w-full max-w-sm"
             disabled={submitting}
           />
 
-          {/* MultiSelect for target roles */}
+          {/* Roles */}
           {isAdmin && (
-            <MultiSelect
-              selected={targetRoles}
-              options={roleOptions}
-              onChange={(newSelection) => {
-                if (newSelection.length <= roleOptions.length) {
-                  setTargetRoles(newSelection);
-                }
-              }}
-              placeholder="Select target roles"
-              disabled={submitting}
-            />
+            <div className="w-full max-w-sm">
+              <MultiSelect
+                selected={targetRoles}
+                options={roleOptions}
+                onChange={(newSelection) => {
+                  if (newSelection.length <= roleOptions.length) {
+                    setTargetRoles(newSelection);
+                  }
+                }}
+                placeholder="Select target roles"
+                disabled={submitting}
+              />
+            </div>
           )}
 
-          {/* Expiration Date */}
-          <div>
-            <label className="block mb-2 font-medium text-sm text-gray-700">
+          {/* Expiration Date Button */}
+          <div className="w-full max-w-sm">
+            <label className="block mb-1 font-medium text-sm text-gray-700">
               Expiration Date (optional)
             </label>
-            <Calendar
-              mode="single"
-              selected={expiresAt}
-              onSelect={setExpiresAt}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start text-left font-normal"
+              onClick={() => setCalendarOpen(true)}
               disabled={submitting}
-              className="rounded-lg border border-indigo-200 shadow-sm"
-            />
-            {expiresAt && (
-              <p className="mt-2 text-sm text-indigo-600 font-medium">
-                Selected: {format(expiresAt, "PPP")}
-              </p>
-            )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {expiresAt ? format(expiresAt, "PPP") : "Pick a date"}
+            </Button>
           </div>
         </div>
 
-        {/* Action & feedback */}
+        {/* Feedback + Submit */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
           {error && <p className="text-sm text-red-600">{error}</p>}
           {success && (
@@ -166,6 +173,21 @@ export default function CreateMaterial() {
           </Button>
         </div>
       </div>
+
+      {/* Calendar Dialog */}
+      <CalendarDialog open={calendarOpen} onOpenChange={setCalendarOpen}>
+        <CalendarDialogContent className="w-auto p-4">
+          <Calendar
+            mode="single"
+            selected={expiresAt}
+            onSelect={(date) => {
+              setExpiresAt(date);
+              setCalendarOpen(false);
+            }}
+            initialFocus
+          />
+        </CalendarDialogContent>
+      </CalendarDialog>
     </div>
   );
 }
