@@ -36,7 +36,7 @@ export default function Messages() {
 
   if (loading) return <p>Loading sent messages...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
-  // if (messages.length === 0) return <p>No messages sent yet.</p>;
+if (messages.length === 0) return <p>No messages sent yet.</p>;
 
   return (
 
