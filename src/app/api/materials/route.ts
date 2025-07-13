@@ -6,61 +6,86 @@ import User from "@/app/models/User";
 import  { IUserWithRole } from "@/app/models/Material"; // import the type explicitly
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    try {
-         const { title, content, targetRoles = [], explicitUsers = [], expiresAt } = await req.json();
+  const session = await getServerSession(authOptions);
+  console.log("Session:", session);
+
+  if (!session) {
+    console.warn("Unauthorized request: No session found");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    console.log("Request body:", body);
+
+    const { title, content, targetRoles = [], explicitUsers = [], expiresAt } = body;
+
     if (!title || !content) {
-        return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
+      console.warn("Validation error: Title or content missing");
+      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
     const userDoc = await User.findById(session.user.id);
+    console.log("Fetched userDoc:", userDoc);
+
     if (!userDoc) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      console.warn("User not found with ID:", session.user.id);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const me = userDoc.toObject() as IUserWithRole & { classId?: string };
+    console.log("Parsed user object:", me);
 
     let finalExplicitUsers = explicitUsers;
 
     if (me.role === 'teacher') {
-        // Teachers cannot target roles, only students in their class
-const students = await User.find({ role: 'student', classId: me.classId });
-const studentIds = students.map(s => s._id.toString());
+      console.log("User is teacher. Fetching students in class:", me.classId);
+      const students = await User.find({ role: 'student', classId: me.classId });
+      const studentIds = students.map(s => s._id.toString());
+      console.log("Found student IDs:", studentIds);
 
+      finalExplicitUsers = finalExplicitUsers.filter(id => studentIds.includes(id));
+      console.log("Filtered explicitUsers for teacher:", finalExplicitUsers);
 
-        finalExplicitUsers = finalExplicitUsers.filter(id => studentIds.includes(id));
-        if (finalExplicitUsers.length === 0) {
-            return NextResponse.json({ error: "No valid student recipients found" }, { status: 400 });
-        }
+      if (finalExplicitUsers.length === 0) {
+        console.warn("No valid student recipients after filtering");
+        return NextResponse.json({ error: "No valid student recipients found" }, { status: 400 });
+      }
     }
 
-    const material = await Material.createAndFanOut({
-        creator: me,
-        title,
-        content,
-        targetRoles: me.role === "admin" ? targetRoles : [],
-        explicitUsers: me.role === "admin" ? explicitUsers : finalExplicitUsers,
-        expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
-    });
+    const materialPayload = {
+      creator: me,
+      title,
+      content,
+      targetRoles: me.role === "admin" ? targetRoles : [],
+      explicitUsers: me.role === "admin" ? explicitUsers : finalExplicitUsers,
+      expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+    };
+
+    console.log("Creating material with payload:", materialPayload);
+
+    const material = await Material.createAndFanOut(materialPayload);
+
+    console.log("Material created successfully:", material);
 
     return NextResponse.json(material, { status: 201 });
-    }  catch (error: unknown) {
+
+  } catch (error: unknown) {
+    console.error("Error in POST /api/materials:", error);
+
     let message = "Internal Server Error";
-  
+
     if (error instanceof Error) {
       message = error.message;
     }
-  
+
     return new NextResponse(
       JSON.stringify({ message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-   
 }
+
 
 
 

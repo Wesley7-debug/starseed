@@ -1,13 +1,10 @@
-
-import CoursesPage from "./(dashboard)/Teacher/(TeacherFetch)/TeachCourses/page";
-import CreateMaterial from "./(sharedpages)/Message/CreateMaterial";
-
+import Login from "./Login/page";
 
 
 export default function Home() {
   return (
   <>
-<CreateMaterial/>
+<Login/>
   </>
   );
 }
