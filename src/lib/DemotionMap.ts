@@ -1,0 +1,20 @@
+export const demotionMap: Record<string, string> = {
+  "Pre-nursery": "Creche",
+  "Nursery-1": "Pre-nursery",
+  "Nursery-2": "Nursery-1",
+  "Nursery-3": "Nursery-2",
+  "Primary-1": "Nursery-3",
+  "Primary-2": "Primary-1",
+  "Primary-3": "Primary-2",
+  "Primary-4": "Primary-3",
+  "Primary-5": "Primary-4",
+  "Primary-6": "Primary-5",
+  "Jss-1": "Primary-6",
+  "Jss-2": "Jss-1",
+  "Jss-3": "Jss-2",
+  "Ss-1": "Jss-3",
+  "Ss-2": "Ss-1",
+  "Ss-3": "Ss-2",
+  "Alumni": "Ss-3",
+  
+};

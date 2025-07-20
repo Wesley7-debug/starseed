@@ -93,8 +93,10 @@ export function AddCourseModal({
       });
 
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data?.message || "Failed to save");
+      if (!res.ok) {
+        toast.error(data?.error || "Failed to save");
+        return;
+      }
 
       toast.success("Courses added successfully!");
       onSave(
@@ -111,30 +113,24 @@ export function AddCourseModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="w-full max-w-sm sm:max-w-md max-h-[80vh] overflow-hidden rounded-lg p-6 bg-white shadow-lg flex flex-col relative">
-        {/* Top Header with title and close button */}
-        <DialogHeader className="flex justify-between items-start">
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogContent
+        className="  w-full max-w-sm sm:max-w-md overflow-hidden rounded-lg p-6 bg-white shadow-lg flex flex-col absolute"
+      >
+        {/* Header with Title and X Button */}
+        <DialogHeader className="relative">
           <DialogTitle className="text-xl font-semibold">
             {initial ? "Edit Course" : "Add Courses"}
           </DialogTitle>
+
         </DialogHeader>
 
-        {/* Custom X button (top right) */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          type="button"
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
+        {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col space-y-5 flex-grow overflow-hidden"
+          className="flex flex-col space-y-5 flex-grow overflow-hidden mt-4"
         >
-          {/* Course Name Input */}
+          {/* Input field with autosuggest */}
           <div className="relative">
             <Label htmlFor="subject" className="font-semibold">
               Course Name(s)
@@ -150,7 +146,6 @@ export function AddCourseModal({
               autoComplete="off"
               disabled={saving || loading}
             />
-
             {subject.trim().length > 0 && showAutosuggest && (
               <div className="absolute top-full left-0 right-0 z-20 max-h-64 overflow-y-auto border rounded-md bg-white shadow-lg mt-1">
                 <CourseAutosuggest
@@ -163,7 +158,7 @@ export function AddCourseModal({
             )}
           </div>
 
-          {/* Selected Courses with Departments */}
+          {/* Selected Courses */}
           {selectedCourses.length > 0 && (
             <div>
               <Label className="font-semibold">Selected Courses</Label>
@@ -201,8 +196,8 @@ export function AddCourseModal({
             </div>
           )}
 
+          {/* Spacer + Actions */}
           <div className="flex-grow" />
-
           <div className="mt-6 flex justify-end space-x-3">
             <Button
               type="button"

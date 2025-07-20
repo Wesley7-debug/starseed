@@ -33,7 +33,7 @@ export default function Login() {
           name: user.name,
           avatarUrl: user.avatarUrl
         });
-      
+  console.log(`Attempted to save student: ${user.RegNo}`);
       }
       setLoading(false);
       redirect('/Dashboard');

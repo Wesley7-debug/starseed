@@ -3,9 +3,11 @@ import Course from "@/app/models/Course";
 import User from "@/app/models/User";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions } from "../../auth/[...nextauth]/authOptions";
+
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,45 +16,85 @@ export async function POST(req: NextRequest) {
   try {
     await connectDb();
 
-    const { subject, department, courseId } = await req.json();
+    const { courses } = await req.json();
 
-    if (!subject || !courseId) {
-      return NextResponse.json({ error: "Subject and courseId are required" }, { status: 400 });
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return NextResponse.json(
+        { error: "Courses array is required" },
+        { status: 400 }
+      );
     }
 
-    const teacher = await User.findOne({ RegNo: session.user.RegNo });
+    const user = await User.findOne({ RegNo: session.user.RegNo });
 
-    if (!teacher || teacher.role !== "teacher") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    if (!teacher.classId) {
-      return NextResponse.json({ error: "Teacher must have a class assigned" }, { status: 400 });
+// if (!user.classId) {
+//   if (user.role !== "admin") {
+//     return NextResponse.json({ error: "Teacher must have a class assigned" }, { status: 400 });
+//   }
+// }
+
+
+    // Validate input format
+    for (const course of courses) {
+      if (!course.subject || !course.courseId) {
+        return NextResponse.json(
+          {
+            error: "Each course must have a subject and courseId",
+          },
+          { status: 400 }
+        );
+      }
     }
 
-    const exists = await Course.findOne({ courseId });
-    if (exists) {
-      return NextResponse.json({ error: "Course already exists" }, { status: 409 });
+    // Check for duplicates in DB
+    const courseIds = courses.map((c) => c.courseId);
+    const existing = await Course.find({ courseId: { $in: courseIds } });
+
+    if (existing.length > 0) {
+      const existingIds = existing.map((c) => c.courseId);
+      return NextResponse.json(
+        {
+          error: `Courses with the following IDs already exist: ${existingIds.join(
+            ", "
+          )}`,
+        },
+        { status: 409 }
+      );
     }
 
-    const newCourse = await Course.create({
-      subject,
-      courseId,
-      department: department || null,
-      classId: teacher.classId,
-      addedBy: teacher
-    });
+    // Create new courses
+    const newCourses = await Course.insertMany(
+      courses.map((c) => ({
+        subject: c.subject.trim(),
+        courseId: c.courseId.trim(),
+        department: c.department || null,
+        // classId: user.classId,
+        addedBy: user._id, // just store ID
+      }))
+    );
 
-    return NextResponse.json({ message: "Course created", newCourse }, { status: 200 });
-
+    return NextResponse.json(
+      { message: "Courses created", newCourses },
+      { status: 200 }
+    );
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal Server Error";
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
     return new NextResponse(JSON.stringify({ message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
 }
+
+
 
 export async function GET() {
   const session = await getServerSession();

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import formidable, { File as FormidableFile } from "formidable";
+import { IncomingForm, File as FormidableFile } from "formidable";
 import fs from "fs";
-import type { IncomingMessage } from "http";
 import path from "path";
+import type { IncomingMessage } from "http";
 
 export const config = {
   api: {
@@ -17,28 +17,30 @@ export async function POST(request: Request) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  const form = new formidable.IncomingForm({
-    uploadDir,
-    keepExtensions: true,
-    maxFileSize: 2 * 1024 * 1024, // 2MB
-  });
+const form = new IncomingForm({
+  uploadDir,
+  keepExtensions: true,
+  maxFileSize: 2 * 1024 * 1024, // 2MB
+});
 
-  const data: { file: FormidableFile } = await new Promise((resolve, reject) => {
-    form.parse(request as unknown as IncomingMessage, (err, fields, files) => {
-      if (err) return reject(err);
+  try {
+    const data: { file: FormidableFile } = await new Promise((resolve, reject) => {
+      form.parse(request as unknown as IncomingMessage, (err, fields, files) => {
+        if (err) return reject(err);
 
-      const uploadedFile = files.file;
+        const uploadedFile = files.file;
+        if (!uploadedFile) return reject(new Error("No file uploaded"));
 
-      // Handle array or single file
-      if (!uploadedFile) return reject(new Error("No file uploaded"));
-      const file = Array.isArray(uploadedFile) ? uploadedFile[0] : uploadedFile;
-
-      resolve({ file });
+        const file = Array.isArray(uploadedFile) ? uploadedFile[0] : uploadedFile;
+        resolve({ file });
+      });
     });
-  });
 
-  const filename = path.basename(data.file.filepath);
-  const fileUrl = `/uploads/${filename}`;
-
-  return NextResponse.json({ url: fileUrl });
+    const filename = path.basename(data.file.filepath);
+    const fileUrl = `/uploads/${filename}`;
+    return NextResponse.json({ url: fileUrl });
+  } catch (error) {
+    console.error("Upload error:", error);
+    return NextResponse.json({ error: "File upload failed" }, { status: 500 });
+  }
 }

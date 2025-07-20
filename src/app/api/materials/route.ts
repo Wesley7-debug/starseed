@@ -4,6 +4,7 @@ import { authOptions } from "../auth/[...nextauth]/authOptions";
 import Material from "@/app/models/Material";
 import User from "@/app/models/User";
 import  { IUserWithRole } from "@/app/models/Material"; // import the type explicitly
+import connectDb from "@/app/libs/ConnectDb";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -15,6 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    await connectDb();
     const body = await req.json();
     console.log("Request body:", body);
 
@@ -99,9 +101,10 @@ export async function GET() {
   }
 
   try {
-    const materials = await Material.find({ "creator._id": session.user.id })
-      .sort({ createdAt: -1 })
-      .lean();
+    await connectDb()
+const materials = await Material.find({ createdBy: session.user.id })
+  .sort({ createdAt: -1 })
+  .lean();
 
     return NextResponse.json(materials, { status: 200 });
   } catch (error: unknown) {

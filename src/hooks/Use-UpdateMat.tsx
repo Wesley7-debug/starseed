@@ -3,11 +3,11 @@ import { useState } from 'react';
 
 export function useUpdateMaterials(onSuccess?: () => void) {
   const [loading, setLoading] = useState(false);
-  const updateCourse = async (id: string, data: { title?: string; conten?: string }) => {
+  const updateCourse = async (id: string, data: { title?: string; content?: string }) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/materials/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });

@@ -2,7 +2,6 @@
 
 import {
   LayoutDashboard,
-  LogOutIcon,
   LucideChevronsUpDown,
   User2,
   Inbox,
@@ -35,6 +34,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import HandleLogout from "@/components/reusable/Handle-logout";
+import { useSession } from "next-auth/react";
 
 type NavItem = {
   title: string;
@@ -43,56 +44,60 @@ type NavItem = {
 };
 
 const topNav: NavItem[] = [
-  {
-    title: "Dashboard",
-    url: "/Student",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Profile",
-    url: "/ViewProfile",
-    icon: User2,
-  },
-  {
-    title: "Inbox",
-    url: "/Inbox",
-    icon: Inbox,
-  },
-  {
-    title: "Courses",
-    url: "/",
-    icon: BookCopyIcon,
-  },
-  {
-    title: "TimeTable",
-    url: "/",
-    icon: BookOpen,
-  },
-  {
-    title: "Grades",
-    url: "/",
-    icon: BookUserIcon,
-  },
+  { title: "Dashboard", url: "/Student", icon: LayoutDashboard },
+  { title: "Profile", url: "/ViewProfile", icon: User2 },
+  { title: "Inbox", url: "/Inbox", icon: Inbox },
+  { title: "Courses", url: "/", icon: BookCopyIcon },
+  { title: "TimeTable", url: "/", icon: BookOpen },
+  { title: "Grades", url: "/", icon: BookUserIcon },
 ];
 
 export default function StuSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    // Fetch unread inbox messages count
-    fetch("/api/inbox/unread-count")
-      .then((res) => res.json())
-      .then((data) => setUnreadCount(data.count || 0));
+    async function getUnreadCount() {
+      try {
+        const res = await fetch("/api/materials/Inbox");
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const readIds = (() => {
+          if (typeof window === "undefined") return [];
+          try {
+            const stored = localStorage.getItem("readMessages");
+            return stored ? JSON.parse(stored) : [];
+          } catch {
+            return [];
+          }
+        })();
+
+        const unread = data.filter((msg) => !readIds.includes(msg._id));
+        setUnreadCount(unread.length);
+      } catch {
+        setUnreadCount(0);
+      }
+    }
+
+    getUnreadCount();
+
+    const interval = setInterval(getUnreadCount, 300000); // refresh every 30s
+
+    return () => clearInterval(interval);
   }, []);
+const { data: session } = useSession();
 
   return (
     <Sidebar collapsible="icon" className="mt-2">
-      {/* Header */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/Teacher">
+              <Link href="/Teacher" className="flex items-center gap-2">
                 <Image
                   src="/images/logo.png"
                   width={30}
@@ -106,7 +111,6 @@ export default function StuSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* Content */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
@@ -114,11 +118,10 @@ export default function StuSidebar() {
             <SidebarMenu>
               {topNav.map((nav) => {
                 const isInbox = nav.title === "Inbox";
-
                 return (
                   <SidebarMenuItem key={nav.title}>
                     <SidebarMenuButton asChild>
-                      <a
+                      <Link
                         href={nav.url}
                         className="flex items-center justify-between w-full"
                       >
@@ -134,7 +137,7 @@ export default function StuSidebar() {
                             {unreadCount}
                           </Badge>
                         )}
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -144,38 +147,38 @@ export default function StuSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuButton>
             <div className="flex w-full justify-between">
               <div className="flex gap-2">
-                <Image src='/images/logo.png' width={30} height={30} alt="logo img" />
-                <span>username</span>
-        </div>
-<DropdownMenu >
-
-  <DropdownMenuTrigger asChild>
-<LucideChevronsUpDown/>
-  </DropdownMenuTrigger>
-
-  <DropdownMenuContent>
-
-    <DropdownMenuSeparator/>
-    <DropdownMenuItem> <User2/> Switch Profile</DropdownMenuItem>
-    <DropdownMenuItem> <LogOutIcon/>  Logout</DropdownMenuItem>
-
-  </DropdownMenuContent>
-</DropdownMenu>
-      </div>
-              
-
-             
-
-
-
-    </SidebarMenuButton>
-   </SidebarMenu>
+                <Image
+                  src="/images/logo.png"
+                  width={30}
+                  height={30}
+                  alt="logo img"
+                />
+                <span>{session?.user.name}</span>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <LucideChevronsUpDown />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuSeparator />
+                       <DropdownMenuItem>
+                    <Link href='/Student/SwitchProfile'>
+ <User2 /> Switch Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <HandleLogout/>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

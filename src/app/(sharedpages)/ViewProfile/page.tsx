@@ -15,7 +15,6 @@ type Role = 'admin' | 'teacher' | 'student';
 interface SessionUser {
   id: string;
   name: string;
-  email: string;
   phone?: string;
   role: Role;
   RegNo: string;
@@ -23,8 +22,8 @@ interface SessionUser {
   imageUrl?: string;
 }
 
-const editableFields: Array<keyof Pick<SessionUser, 'name' | 'email' | 'phone' | 'classId'>> = [
-  'email',
+const editableFields: Array<keyof Pick<SessionUser, 'name' |  'phone' | 'classId'>> = [
+
   'name',
   'phone',
   'classId',
@@ -46,7 +45,7 @@ export default function ProfileView() {
     }
   }, [user]);
 
-  if (!user || !formData) return <div>Please log in.</div>;
+  if (!user || !formData) return <div>loading..</div>;
 
   const isAdmin = user.role === 'admin';
   const canEdit = isAdmin || ['teacher', 'student'].includes(user.role);
@@ -144,7 +143,7 @@ export default function ProfileView() {
 
         <div className="text-center sm:text-left">
           <h2 className="text-2xl font-semibold">{user.name}</h2>
-          <p className="text-sm text-muted-foreground">{user.email}</p>
+       
         </div>
       </div>
 

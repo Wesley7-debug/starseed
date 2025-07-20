@@ -17,21 +17,14 @@ export default function SwitchProfile() {
   const [deleteUser, setDeleteUser] = useState(false);
   const [userToRemove, setUserToRemove] = useState<SavedUser | null>(null);
   const [users, setUsers] = useState<SavedUser[]>([
-    {
-      name: "ada",
-      RegNo: "sms1002",
-    },
-    {
-      name: "ada",
-      RegNo: "sms100",
-    },
+
   ]);
 
   const router = useRouter();
 
-  // useEffect(() => {
-  //   setUsers(getSavedUser());
-  // }, []);
+  useEffect(() => {
+    setUsers(getSavedUser());
+  }, []);
 
   const handleSwitch = (reg: string) => {
     router.push(`/Login?reg=${reg}`);

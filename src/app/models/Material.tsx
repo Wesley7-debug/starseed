@@ -11,7 +11,6 @@ interface IMaterial extends Document {
   createdBy: Types.ObjectId;
   targetRoles?: Role[];
   targetUsers?: Types.ObjectId[];
-  readBy?: Types.ObjectId[];
   expiresAt?: Date;
 }
 
@@ -59,7 +58,7 @@ const materialSchema = new Schema<IMaterial>(
 
     targetUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
 
-    readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+
 
     expiresAt: {
       type: Date,
@@ -107,31 +106,19 @@ materialSchema.statics.createAndFanOut = async function ({
     createdBy: creator._id,
     classId: creator.classId,
     targetRoles,
-    targetUsers: Array.from(recipients).map(
-      (id) => new mongoose.Types.ObjectId(id)
-    ),
+    targetUsers: Array.from(recipients).map((id) => new mongoose.Types.ObjectId(id)),
     expiresAt: resolvedExpiry,
   });
 };
 
 //
-// ✅ Indexes
+//  Safe Indexes (no parallel arrays)
 //
 
-// Most important: get materials for a user, ordered by creation
-materialSchema.index({ targetUsers: 1, createdAt: -1 });
-
-// Optional: if you want to query by users who read the message
-// materialSchema.index({ readBy: 1 }); // ← safe (not compound)
-
-// Optional: createdBy index (e.g., admin panel or teacher dashboard)
-materialSchema.index({ createdBy: 1, createdAt: -1 });
-
-// Optional: if querying by classId
-// materialSchema.index({ classId: 1 });
-
-//  auto-delete materials after expiry
-materialSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+materialSchema.index({ targetUsers: 1 });                      // Index by user
+materialSchema.index({ createdAt: -1 });                       // For ordering              // Optional
+materialSchema.index({ createdBy: 1, createdAt: -1 });         // Admin/teacher dashboards
+materialSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL for expiry
 
 // Export model
 const Material =

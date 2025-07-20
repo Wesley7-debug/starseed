@@ -25,7 +25,7 @@ export async function GET() {
 
     const { role, classId } = user;
 
-    // ⚠ Convert user._id to ObjectId explicitly
+    // Convert user._id to ObjectId explicitly
     const userObjectId = new Types.ObjectId(user._id as unknown as string);
 
     //  Properly typed filter using FilterQuery<IMaterial>
@@ -45,12 +45,9 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean() || [];
 
-    const formatted = materials.map((m) => ({
-      ...m,
-      read: m.readBy?.map((id) => String(id)).includes(String(user._id)) ?? false,
-    }));
+ 
 
-    return NextResponse.json(formatted);
+    return NextResponse.json(materials);
   } catch (error: unknown) {
     let message = "Internal Server Error";
 

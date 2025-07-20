@@ -36,7 +36,8 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import { signOut, useSession } from "next-auth/react";
+import {  useSession } from "next-auth/react";
+import HandleLogout from "../../../../../components/reusable/Handle-logout";
 
 type NavItem = {
   title: string;
@@ -143,7 +144,8 @@ const {data: session} = useSession();
     <DropdownMenuSeparator/>
     <DropdownMenuItem> <User2/> Profile</DropdownMenuItem>
     <DropdownMenuItem> <LogOutIcon/>  
-    <span onClick={() => signOut()}>Logout</span></DropdownMenuItem>
+ <HandleLogout/>
+ </DropdownMenuItem>
 
   </DropdownMenuContent>
 </DropdownMenu>

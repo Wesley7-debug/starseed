@@ -15,7 +15,8 @@ export const addUserToSaved =(user: SavedUser) =>{
      if(typeof window === 'undefined') return [];
      const saved = getSavedUser();
      if(saved.find (u =>u.RegNo === user.RegNo)) return;
-     if(saved.length < 7) return;
+    if (saved.length >= 7) return;
+
      saved.push(user);
      localStorage.setItem('studentUser', JSON.stringify(saved))
 };

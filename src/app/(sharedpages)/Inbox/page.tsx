@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
-
 import { Loader2 } from "lucide-react";
 
 type Material = {
@@ -13,60 +12,84 @@ type Material = {
   read: boolean;
 };
 
+// Assume you get this from session or props, e.g. from next-auth or your own auth system
+const user = {
+  id: "teacher123", // or "student456"
+  role: "teacher",  // or "student"
+  name: "John Doe",
+};
+
 export default function InboxPage() {
+  // Use a dynamic storage key based on user id or role
+  const READ_STORAGE_KEY = `readMessages_${user.id}`;
+
   const [messages, setMessages] = useState<Material[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Add welcome message manually
-  const user = { name: "John Doe" }; // Replace with actual user logic
-
-useEffect(() => {
-  async function fetchMessages() {
+  const getReadMessages = (): string[] => {
+    if (typeof window === "undefined") return [];
     try {
-      const res = await fetch("/api/materials/Inbox");
-      const data = await res.json();
-
-      const welcomeMessage: Material = {
-        _id: "default-welcome",
-        title: "Welcome",
-        content: `Welcome ${user.name}, this is the official website of Immaculate Star Seed Academy.`,
-        createdAt: new Date().toISOString(),
-        read: true,
-      };
-
-      if (Array.isArray(data)) {
-        setMessages([welcomeMessage, ...data]);
-      } else {
-        console.error("Expected array, got:", data);
-        setMessages([welcomeMessage]);
-      }
-    } catch (error) {
-      console.error("Inbox fetch error:", error);
-      setMessages([]);
-    } finally {
-      setLoading(false);
+      const stored = localStorage.getItem(READ_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
     }
-  }
+  };
 
-  fetchMessages();
-}, []);
+  const saveReadMessages = (ids: string[]) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(ids));
+  };
 
+  useEffect(() => {
+    async function fetchMessages() {
+      try {
+        const res = await fetch("/api/materials/Inbox");
+        const data = await res.json();
 
-  const markAsRead = async (id: string) => {
+        const welcomeMessage: Material = {
+          _id: "default-welcome",
+          title: "Welcome",
+          content: `Welcome ${user.name}, this is the official website of Immaculate Star Seed Academy.`,
+          createdAt: new Date().toISOString(),
+          read: true,
+        };
+
+        const readIds = getReadMessages();
+
+        if (Array.isArray(data)) {
+          const mapped = data.map((msg: Material) => ({
+            ...msg,
+            read: readIds.includes(msg._id),
+          }));
+
+          setMessages([welcomeMessage, ...mapped]);
+        } else {
+          setMessages([welcomeMessage]);
+        }
+      } catch (error) {
+        console.error("Inbox fetch error:", error);
+        setMessages([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMessages();
+  }, [READ_STORAGE_KEY]); // re-run if key changes (if user changes)
+
+  const markAsRead = (id: string) => {
     if (id === "default-welcome") return;
 
-    await fetch("/api/materials/Inbox", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ materialId: id }),
-    });
-
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === id ? { ...msg, read: true } : msg
-      )
+      prev.map((msg) => (msg._id === id ? { ...msg, read: true } : msg))
     );
+
+    const readIds = getReadMessages();
+    if (!readIds.includes(id)) {
+      saveReadMessages([...readIds, id]);
+    }
   };
 
   const handleOpen = (id: string) => {
@@ -82,8 +105,7 @@ useEffect(() => {
       </div>
     );
 
-  if (messages.length === 0)
-    return <div className="p-6">No messages.</div>;
+  if (messages.length === 0) return <div className="p-6">No messages.</div>;
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-4">

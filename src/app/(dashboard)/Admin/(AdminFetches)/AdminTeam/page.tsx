@@ -1,6 +1,7 @@
 'use client';
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usERrs } from "../../Admpages/AdmCharts/user";
 import Register from "@/app/Register/page";
@@ -23,6 +24,16 @@ export default function AdminTeam() {
 
   return (
     <div className="px-6 py-6 rounded-lg border-2 space-y-4 w-full">
+
+            <Breadcrumb>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/Admin">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem >
+                <BreadcrumbLink href="/Admin/AdminTeam">Team</BreadcrumbLink>
+              </BreadcrumbItem>
+            </Breadcrumb>
       {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex gap-4">
