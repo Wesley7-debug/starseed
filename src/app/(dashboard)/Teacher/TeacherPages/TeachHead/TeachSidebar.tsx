@@ -9,6 +9,7 @@ import {
   Inbox,
   MessageCircle,
 } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +30,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useClientAuth } from "@/app/hooks/UseClientAuth";
+import { usePathname } from "next/navigation";
 
 type NavItem = {
   title: string;
@@ -50,47 +54,61 @@ const topNav: NavItem[] = [
 ];
 
 export default function TeacherSidebar() {
+  const { session } = useClientAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    async function fetchUnread() {
-      try {
-        const res = await fetch("/api/materials/Inbox");
-        const data = await res.json();
+  const fetchUnread = async () => {
+    try {
+      const res = await fetch("/api/materials/Inbox");
+      const data = await res.json();
 
-        if (!Array.isArray(data)) {
-          setUnreadCount(0);
-          return;
-        }
-
-        // Use a unique key for teacher messages in localStorage
-        const readIds = (() => {
-          if (typeof window === "undefined") return [];
-          try {
-            const stored = localStorage.getItem("readMessagesTeacher");
-            return stored ? JSON.parse(stored) : [];
-          } catch {
-            return [];
-          }
-        })();
-
-        // Filter messages to get unread ones
-        const unreadMessages = data.filter(
-          (msg: { _id: string }) => !readIds.includes(msg._id)
-        );
-
-        setUnreadCount(unreadMessages.length);
-      } catch {
+      if (!Array.isArray(data)) {
         setUnreadCount(0);
+        return;
       }
+
+      const readIds = (() => {
+        if (typeof window === "undefined") return [];
+        try {
+          const stored = localStorage.getItem("readMessagesTeacher");
+          return stored ? JSON.parse(stored) : [];
+        } catch {
+          return [];
+        }
+      })();
+
+      const unreadMessages = data.filter(
+        (msg: { _id: string }) => !readIds.includes(msg._id)
+      );
+
+      setUnreadCount(unreadMessages.length);
+    } catch {
+      setUnreadCount(0);
     }
+  };
 
+  // Initial fetch and polling
+  useEffect(() => {
     fetchUnread();
-
-    // Optional: Refresh unread count every 30 seconds
-    const interval = setInterval(fetchUnread, 30000);
-
+    const interval = setInterval(fetchUnread, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Refetch on route change to /Inbox
+  useEffect(() => {
+    if (pathname === "/Inbox") {
+      fetchUnread();
+    }
+  }, [pathname]);
+
+  // Listen to messageRead event from /Inbox page
+  useEffect(() => {
+    const handleMessageRead = () => {
+      fetchUnread();
+    };
+    window.addEventListener("messageRead", handleMessageRead);
+    return () => window.removeEventListener("messageRead", handleMessageRead);
   }, []);
 
   return (
@@ -160,13 +178,12 @@ export default function TeacherSidebar() {
                   height={30}
                   alt="logo img"
                 />
-                <span>username</span>
+                <span>{session?.user.name}</span>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <LucideChevronsUpDown />
                 </DropdownMenuTrigger>
-
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>

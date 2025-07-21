@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 type Material = {
   _id: string;
@@ -12,15 +13,14 @@ type Material = {
   read: boolean;
 };
 
-// Assume you get this from session or props, e.g. from next-auth or your own auth system
 const user = {
-  id: "teacher123", // or "student456"
-  role: "teacher",  // or "student"
+  id: "teacher123",
+  role: "teacher",
   name: "John Doe",
 };
 
 export default function InboxPage() {
-  // Use a dynamic storage key based on user id or role
+  const router = useRouter();
   const READ_STORAGE_KEY = `readMessages_${user.id}`;
 
   const [messages, setMessages] = useState<Material[]>([]);
@@ -38,7 +38,6 @@ export default function InboxPage() {
   };
 
   const saveReadMessages = (ids: string[]) => {
-    if (typeof window === "undefined") return;
     localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(ids));
   };
 
@@ -63,7 +62,6 @@ export default function InboxPage() {
             ...msg,
             read: readIds.includes(msg._id),
           }));
-
           setMessages([welcomeMessage, ...mapped]);
         } else {
           setMessages([welcomeMessage]);
@@ -77,7 +75,7 @@ export default function InboxPage() {
     }
 
     fetchMessages();
-  }, [READ_STORAGE_KEY]); // re-run if key changes (if user changes)
+  }, [READ_STORAGE_KEY]);
 
   const markAsRead = (id: string) => {
     if (id === "default-welcome") return;
@@ -89,6 +87,9 @@ export default function InboxPage() {
     const readIds = getReadMessages();
     if (!readIds.includes(id)) {
       saveReadMessages([...readIds, id]);
+
+      // Notify sidebar to update the badge
+      window.dispatchEvent(new Event("messageRead"));
     }
   };
 
@@ -98,17 +99,27 @@ export default function InboxPage() {
     if (msg && !msg.read) markAsRead(id);
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 flex justify-center">
         <Loader2 className="animate-spin" />
       </div>
     );
+  }
 
   if (messages.length === 0) return <div className="p-6">No messages.</div>;
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-4">
+      {/* Go Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Go Back
+      </button>
+
       <h1 className="text-2xl font-semibold mb-4">Inbox</h1>
 
       {messages.map((msg) => (
@@ -116,7 +127,7 @@ export default function InboxPage() {
           <DrawerTrigger asChild>
             <div
               onClick={() => handleOpen(msg._id)}
-              className={`cursor-pointer border p-4 rounded-md shadow-sm flex justify-between items-center ${
+              className={`cursor-pointer border p-4 rounded-md shadow-sm flex justify-between items-center transition ${
                 msg.read ? "bg-white" : "bg-blue-100"
               }`}
             >

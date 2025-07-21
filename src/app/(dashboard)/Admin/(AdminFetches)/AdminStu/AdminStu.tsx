@@ -1,26 +1,17 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
+import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow,} from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
-import { Search, Filter } from "lucide-react";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
+import { Search, Filter } from "lucide-react";
 import Register from "@/app/Register/page";
 import EditUser from "@/app/EditModal/page";
 import DeleteUser from "@/app/DeleteModal/Page";
@@ -28,6 +19,7 @@ import PromoteButton from "./PromoteStu/PromoteButton";
 import DemoteButton from "./Demote/DemteButton";
 import { Role } from "@/app/models/User";
 import { useDebounce } from "@/app/hooks/Usedebounce";
+import Link from "next/link";
 
 type ClassId =
   | `primary-${1 | 2 | 3 | 4 | 5 | 6}`
@@ -99,14 +91,28 @@ export default function AdminStu() {
   return (
     <div className="w-full px-6 py-6 rounded-lg space-y-6">
       {/* Breadcrumb */}
-      <Breadcrumb>
+
+
+
+
+    <Breadcrumb>
+      <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/Admin/dashboard">Dashboard</BreadcrumbLink>
+          <BreadcrumbLink asChild>
+            <Link href="/Admin">Dashboard</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbItem >
-          <BreadcrumbLink href="/Admin/AdminStu">Students</BreadcrumbLink>
+        <BreadcrumbSeparator />
+
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/Admin/AdminStu">Students</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
-      </Breadcrumb>
+    
+      </BreadcrumbList>
+    </Breadcrumb>
+  
 
       {/* Filter Row */}
       <div className="flex flex-wrap items-center justify-between gap-4">

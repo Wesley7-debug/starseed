@@ -1,86 +1,122 @@
 'use client';
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { usERrs } from "../../Admpages/AdmCharts/user";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumb";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useDebounce } from "@/app/hooks/Usedebounce";
 import Register from "@/app/Register/page";
 
 
-
+interface User {
+  id: string;
+  name: string;
+  classId: string;
+}
 
 export default function AdminTeam() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [teams, setTeams] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300);
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        params.append("role", "admin");
+        if (debouncedSearchQuery) {
+          params.append("name", debouncedSearchQuery);
+        }
 
-  
-  const filteredUsers = usERrs.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch && user.role === "admin";
-  });
+        const res = await fetch(`/api/user/?${params.toString()}`);
+        const { data } = await res.json();
+        setTeams(data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-
+    fetchAdmins();
+  }, [debouncedSearchQuery]);
 
   return (
-    <div className="px-6 py-6 rounded-lg border-2 space-y-4 w-full">
+    <div className="w-full px-3 py-2">
+      <div className="w-full px-3 py-4">
+          <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/Admin">Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/Admin/AdminTeam">Team</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      </div>
 
-            <Breadcrumb>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/Admin">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem >
-                <BreadcrumbLink href="/Admin/AdminTeam">Team</BreadcrumbLink>
-              </BreadcrumbItem>
-            </Breadcrumb>
-      {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex gap-4">
 
+        <div className="px-6 py-6 rounded-lg border-2 space-y-4 w-full">
 
-
-          
-        {/* Search */}
+      {/* Search */}
+      <div className="flex justify-between items-center">
         <Input
           placeholder="Search name..."
-          className="w-[150px] rounded-xl"
+          className="w-[200px] rounded-xl"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-
-        </div>
-<Register/>
+        <Register/>
       </div>
 
-     
-        {/* Scrollable Area */}
-        {/* Table */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>S/N</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Class ID</TableHead>
-             
-              <TableHead>Roles</TableHead> {/* New column */}
+      {/* Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>S/N</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Class ID</TableHead>
+            <TableHead>Roles</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {teams.map((user, index) => (
+            <TableRow key={user.id}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{user.name}</TableCell>
+              <TableCell>{user.classId}</TableCell>
+              <TableCell>Admin</TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUsers.map((user, index) => (
-              <TableRow key={user.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.classId}</TableCell>
-            
-                <TableCell >
-<h1>Admin</h1>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-     
+          ))}
+        </TableBody>
+      </Table>
+
+      {loading && <p>Loading...</p>}
     </div>
+    </div>
+
   );
 }

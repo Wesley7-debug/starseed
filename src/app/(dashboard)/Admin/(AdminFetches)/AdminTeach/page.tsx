@@ -1,4 +1,5 @@
 'use client';
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,8 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumb";
 import Register from "@/app/Register/page";
 import EditUser from "@/app/EditModal/page";
 import DeleteUser from "@/app/DeleteModal/Page";
@@ -60,16 +66,23 @@ export default function AdminTeach() {
   return (
     <div className="w-full px-6 py-6 rounded-lg space-y-6">
       {/* Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/Admin">Dashboard</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem >
-          <BreadcrumbLink href="/Admin/AdminTeach">Teachers</BreadcrumbLink>
-        </BreadcrumbItem>
+      <div className="w-full px-3 py-4">
+          <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/Admin">Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/Admin/AdminTeach">Teachers</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
-
+      </div>
       {/* Filters + Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Search bar with icon */}
