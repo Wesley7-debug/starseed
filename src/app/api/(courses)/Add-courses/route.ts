@@ -34,11 +34,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-// if (!user.classId) {
-//   if (user.role !== "admin") {
-//     return NextResponse.json({ error: "Teacher must have a class assigned" }, { status: 400 });
-//   }
-// }
+if (!user.classId) {
+  if (user.role === "student") {
+    return NextResponse.json({ error: "Teacher must have a class assigned" }, { status: 400 });
+  }
+}
 
 
     // Validate input format
@@ -75,8 +75,8 @@ export async function POST(req: NextRequest) {
         subject: c.subject.trim(),
         courseId: c.courseId.trim(),
         department: c.department || null,
-        // classId: user.classId,
-        addedBy: user._id, // just store ID
+         classId: user.classId,
+        addedBy: user._id, 
       }))
     );
 
@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error: unknown) {
+    console.log('error:',error)
     const message =
       error instanceof Error ? error.message : "Internal Server Error";
     return new NextResponse(JSON.stringify({ message }), {
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
 
 
 export async function GET() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

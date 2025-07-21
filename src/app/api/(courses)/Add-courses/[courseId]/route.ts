@@ -1,3 +1,4 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import connectDb from "@/app/libs/ConnectDb";
 import Course from "@/app/models/Course";
 import User from "@/app/models/User";
@@ -5,8 +6,8 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // PUT: Update a course
-export async function PUT(req: NextRequest, { params }: { params: { courseId: string } }) {
-  const session = await getServerSession();
+export async function PATCH(req: NextRequest, { params }: { params: { courseId: string } }) {
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: { courseId: st
 
     const { subject, department } = await req.json();
     const { courseId } = params;
-
+console.log('courseid',courseId);
     const course = await Course.findOne({ courseId });
 
     if (!course) {
@@ -54,11 +55,16 @@ export async function PUT(req: NextRequest, { params }: { params: { courseId: st
 }
 
 // DELETE: Remove a course
-export async function DELETE(req: NextRequest, { params }: { params: { courseId: string } }) {
-  const session = await getServerSession();
+export async function DELETE(req: NextRequest,  context: { params: { courseId?: string } } ) {
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+    const courseId = context.params?.courseId;
+  if (!courseId) {
+    return NextResponse.json({ error: "Course ID is missing" }, { status: 400 });
   }
 
   try {
@@ -69,7 +75,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { courseId:
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { courseId } = params;
+   
 
     const course = await Course.findOne({ courseId });
 
@@ -81,10 +87,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { courseId:
       return NextResponse.json({ error: "Not allowed to delete this course" }, { status: 403 });
     }
 
-    await Course.deleteOne({ courseId });
+ await Course.findOneAndDelete({ courseId });
+
 
     return NextResponse.json({ message: "Course deleted" }, { status: 200 });
   } catch (error: unknown) {
+    console.log('error',error)
       let message = "Internal Server Error";
   
       if (error instanceof Error) {

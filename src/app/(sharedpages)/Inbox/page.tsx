@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Drawer, DrawerTrigger, DrawerContent } from "@/components/ui/drawer";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { useSession } from "next-auth/react";
+
 
 type Material = {
   _id: string;
@@ -13,29 +15,32 @@ type Material = {
   read: boolean;
 };
 
-const user = {
-  id: "teacher123",
-  role: "teacher",
-  name: "John Doe",
-};
 
 export default function InboxPage() {
+  const { data: session } = useSession();
   const router = useRouter();
+  
+  const user = {
+    id: session?.user.id,
+    role: session?.user.role,
+    name: session?.user.name, // You had session.user.id again here
+  };
   const READ_STORAGE_KEY = `readMessages_${user.id}`;
 
   const [messages, setMessages] = useState<Material[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const getReadMessages = (): string[] => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = localStorage.getItem(READ_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  };
+const getReadMessages = useCallback((): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(READ_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}, [READ_STORAGE_KEY]);
+
 
   const saveReadMessages = (ids: string[]) => {
     localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(ids));
@@ -75,7 +80,7 @@ export default function InboxPage() {
     }
 
     fetchMessages();
-  }, [READ_STORAGE_KEY]);
+  },[getReadMessages, user.name]);
 
   const markAsRead = (id: string) => {
     if (id === "default-welcome") return;

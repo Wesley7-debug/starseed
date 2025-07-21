@@ -4,6 +4,7 @@ import { useDeleteCourse } from '@/hooks/Use-deleteCourse';
 import { Course } from './page';
 
 
+
 interface CourseListProps {
   courses: Course[];
   onEdit: (course: Course) => void;
@@ -12,6 +13,7 @@ interface CourseListProps {
 
 export function CourseList({ courses, onEdit, reload }:CourseListProps) {
   const { deleteCourse, loading } = useDeleteCourse(reload);
+
 
   return (
     <div className="space-y-4">

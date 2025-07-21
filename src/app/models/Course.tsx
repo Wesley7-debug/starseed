@@ -12,22 +12,8 @@ addedBy:  Schema.Types.ObjectId
 const courseSchema = new Schema<ICourse>(
     {
  subject: { type: String, required: true },
- department:{type:String, enum:['science', 'art', null], 
-    default:null,
-validate:{
-    validator: function(value) {
-        //required department for ss1-3
-        const ssClasses =['ss1', 'ss2', 'ss3', 'SS1', 'SS2', 'SS3'];
-        if(ssClasses.includes(this.classId)){
-            return value === 'science' || value === 'art'
-        }
-        return value === null || value === undefined ;
-    },
-    message: function(){
-  return 'department is required for only(ss1-3) students'
-}
-},
-},
+ department:{type:String, enum:['science', 'arts', null], 
+    default:null},
  classId:{type:String, required:true},
  courseId:{type: String, unique:true},
  addedBy: {type: mongoose.Schema.Types.ObjectId, ref:'User', required:true}

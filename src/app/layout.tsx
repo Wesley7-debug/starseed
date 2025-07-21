@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "@/app/hooks/AuthProvider";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "./hooks/Tfemeprovider";
+
 
 
 
@@ -18,17 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <AuthProvider>
-    <html lang="en"  suppressHydrationWarning>
+    <html lang="en"  >
       <body>
-            <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+
         {children}
         <Toaster/>
-        </ThemeProvider>
+        
 
       </body>
     </html>

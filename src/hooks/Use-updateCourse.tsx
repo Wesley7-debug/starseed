@@ -7,7 +7,7 @@ export function useUpdateCourse(onSuccess?: () => void) {
     setLoading(true);
     try {
       const res = await fetch(`/api/Add-courses/${courseId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });

@@ -3,7 +3,6 @@
 import {
   GraduationCap,
   LayoutDashboard,
-  LogOutIcon,
   LucideChevronsUpDown,
   User2,
   Inbox,
@@ -33,18 +32,13 @@ import {
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { useClientAuth } from "@/app/hooks/UseClientAuth";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import HandleLogout from "@/components/reusable/Handle-logout";
 
-type NavItem = {
-  title: string;
-  url: string;
-  icon: React.ElementType;
-};
-
-const topNav: NavItem[] = [
+const topNav = [
   { title: "Dashboard", url: "/Teacher", icon: LayoutDashboard },
   { title: "Profile", url: "/ViewProfile", icon: User2 },
   { title: "Inbox", url: "/Inbox", icon: Inbox },
@@ -54,62 +48,65 @@ const topNav: NavItem[] = [
 ];
 
 export default function TeacherSidebar() {
-  const { session } = useClientAuth();
+  const { data: session } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
   const pathname = usePathname();
 
-  const fetchUnread = async () => {
-    try {
-      const res = await fetch("/api/materials/Inbox");
-      const data = await res.json();
+  // Shared function
+const fetchUnread = useCallback(async () => {
+  if (!session?.user?.id) return;
 
-      if (!Array.isArray(data)) {
-        setUnreadCount(0);
-        return;
-      }
+  try {
+    const res = await fetch("/api/materials/Inbox");
+    const data = await res.json();
 
-      const readIds = (() => {
-        if (typeof window === "undefined") return [];
-        try {
-          const stored = localStorage.getItem("readMessagesTeacher");
-          return stored ? JSON.parse(stored) : [];
-        } catch {
-          return [];
-        }
-      })();
-
-      const unreadMessages = data.filter(
-        (msg: { _id: string }) => !readIds.includes(msg._id)
-      );
-
-      setUnreadCount(unreadMessages.length);
-    } catch {
+    if (!Array.isArray(data)) {
       setUnreadCount(0);
+      return;
     }
-  };
 
-  // Initial fetch and polling
+    const readIds = (() => {
+      if (typeof window === "undefined") return [];
+      try {
+        const stored = localStorage.getItem(`readMessages_${session.user.id}`);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    const unreadMessages = data.filter(
+      (msg: { _id: string }) => !readIds.includes(msg._id)
+    );
+
+    setUnreadCount(unreadMessages.length);
+  } catch {
+    setUnreadCount(0);
+  }
+}, [session?.user?.id]); //  include only what fetchUnread actually depends on
+
+
+  // Initial + polling fetch
   useEffect(() => {
+    if (!session?.user?.id) return;
+
     fetchUnread();
     const interval = setInterval(fetchUnread, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [session?.user?.id, fetchUnread]);
 
-  // Refetch on route change to /Inbox
+  // Refetch on route change
   useEffect(() => {
     if (pathname === "/Inbox") {
       fetchUnread();
     }
-  }, [pathname]);
+  }, [pathname, session?.user?.id, fetchUnread]);
 
-  // Listen to messageRead event from /Inbox page
+  // Listen to "messageRead" event
   useEffect(() => {
-    const handleMessageRead = () => {
-      fetchUnread();
-    };
-    window.addEventListener("messageRead", handleMessageRead);
-    return () => window.removeEventListener("messageRead", handleMessageRead);
-  }, []);
+    window.addEventListener("messageRead", fetchUnread);
+    return () => window.removeEventListener("messageRead", fetchUnread);
+  }, [session?.user?.id, fetchUnread]);
 
   return (
     <Sidebar collapsible="icon" className="mt-2">
@@ -178,7 +175,7 @@ export default function TeacherSidebar() {
                   height={30}
                   alt="logo img"
                 />
-                <span>{session?.user.name}</span>
+                <span>{session?.user?.name || "User"}</span>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -187,10 +184,14 @@ export default function TeacherSidebar() {
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
+                    <Link href='/ViewProfile'>
                     <User2 /> Profile
+                    </Link>
+                    
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <LogOutIcon /> Logout
+                    {/* logout button */}
+                   <HandleLogout/>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
