@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import EditUser from "@/components/reusable/EditModal";
 
 export default function AdminStu() {
-  const { data: session } = useSession();
+ const { data: session } = useSession();
   const teacherClassId = session?.user.classId;
 
   const [searchQuery, setSearchQuery] = useState<string>("");

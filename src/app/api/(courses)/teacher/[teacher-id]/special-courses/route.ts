@@ -19,13 +19,13 @@ import { NextRequest, NextResponse } from "next/server";
 //   avatarUrl: string;
 // }
 
-interface Params {
-  params: {
-    teacherId: string;
-  };
-}
+// interface Params {
+//   params: {
+//     teacherId: string;
+//   };
+// }
 
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: { params: { teacherId: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 402 });
