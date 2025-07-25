@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 
 interface ConfirmPromoteModalProps {
   open: boolean;
+  // eslint-disable-next-line no-unused-vars
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   count: number;

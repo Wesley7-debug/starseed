@@ -1,3 +1,4 @@
+import * as React from "react";
 import AdminUserTable from "./Admpages/AdmCharts/AdminUser";
 import AdminDashboardCard from "./Admpages/AdmCharts/Card";
 import { AdminChartBar } from "./Admpages/AdmCharts/GratChart";

@@ -1,3 +1,4 @@
+import * as React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import TeacherSidebar from "./TeacherPages/TeachHead/TeachSidebar";
 import TeacherHeader from "./TeacherPages/TeachHead/TeacherHead";
