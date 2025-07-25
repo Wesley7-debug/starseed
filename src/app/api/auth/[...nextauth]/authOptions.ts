@@ -33,6 +33,7 @@ console.log("RegNo received:", credentials?.RegNo)
           name: user.name,
           RegNo: user.RegNo,
           role: user.role,
+          avatarUrl: user.avatarUrl
 
         }
       },
@@ -50,6 +51,8 @@ console.log("RegNo received:", credentials?.RegNo)
         token.role = user.role
         token.RegNo = user.RegNo
         token.name = user.name
+        token.avatarUrl= user.avatarUrl
+  
 
       }
       return token
@@ -61,7 +64,7 @@ console.log("RegNo received:", credentials?.RegNo)
         session.user.role = token.role as Role
         session.user.RegNo = token.RegNo as string
         session.user.name = token.name as string
-
+        session.user.avatarUrl = token.avatarUrl as string
       }
       return session
     },

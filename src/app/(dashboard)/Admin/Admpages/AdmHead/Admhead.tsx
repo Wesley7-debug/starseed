@@ -1,6 +1,4 @@
 "use client"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {SidebarTrigger} from "@/components/ui/sidebar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,34 +7,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {SidebarTrigger} from "@/components/ui/sidebar"
+
+import { useSession } from "next-auth/react"
+import Link from "next/link"
+import HandleLogout from "@/components/reusable/Handle-logout"
 export default function AdminHeader() {
+  const {data: session} = useSession()
   return (
 <header className='  relative top-0 '>
   <div className='  flex justify-between  p-4 '>
     {/* sidebarnav */}
   <SidebarTrigger/>
-<div className='flex items-center space-x-4'>
-
-
-
 
 <DropdownMenu>
   <DropdownMenuTrigger>
 <Avatar>
+  {/* <AvatarImage src={session?.avatarUrl} /> */}
   <AvatarImage src="https://github.com/shadcn.png" />
-  <AvatarFallback>CN</AvatarFallback>
+  <AvatarFallback> {session?.user?.name?.charAt(0).toUpperCase() ?? "CN"}</AvatarFallback>
 </Avatar>
   </DropdownMenuTrigger>
   <DropdownMenuContent>
     <DropdownMenuLabel>My Account</DropdownMenuLabel>
     <DropdownMenuSeparator/>
-    <DropdownMenuItem>Profile</DropdownMenuItem>
-    <DropdownMenuItem>Logout</DropdownMenuItem>
+    <DropdownMenuItem>
+      <span>
+        <Link href='/ViewProfile'>
+        View Profile
+        </Link>
+      </span>
+      </DropdownMenuItem>
+    <DropdownMenuItem><HandleLogout/></DropdownMenuItem>
 
   </DropdownMenuContent>
 </DropdownMenu>
+
 </div>
-  </div>
+
 
 </header>
   );

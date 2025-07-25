@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 
 import { demotionMap } from "@/lib/DemotionMap";
 import { toast } from "sonner";
-import { demoteStudents } from "@/hooks/Use-demotestu";
 import { DemoteConfirmModal } from "./Demotemodal";
+import { demoteStudents } from "@/app/hooks/Use-demotestu";
 
 
 interface User {

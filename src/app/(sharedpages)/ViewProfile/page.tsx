@@ -13,6 +13,7 @@ import { Edit } from 'lucide-react';
 type Role = 'admin' | 'teacher' | 'student';
 
 interface SessionUser {
+  avatarUrl:string
   id: string;
   name: string;
   phone?: string;
@@ -41,7 +42,7 @@ export default function ProfileView() {
   useEffect(() => {
     if (user) {
       setFormData({ ...user });
-      setPreview(user.imageUrl);
+      setPreview(user.avatarUrl);
     }
   }, [user]);
 
@@ -73,7 +74,7 @@ export default function ProfileView() {
       if (!res.ok) throw new Error('Save error');
       const updated = await res.json();
       setFormData(updated);
-      setPreview(updated.imageUrl);
+      setPreview(updated.avatarUrl);
       await signIn('credentials', { redirect: false }); // refresh session
       toast.success('Profile updated');
     } catch {
@@ -102,7 +103,7 @@ export default function ProfileView() {
     setSaving(true);
     try {
       const url = await uploadImage(file);
-      await saveField({ imageUrl: url });
+      await saveField({ avatarUrl: url });
       setPreview(url);
     } catch {
       toast.error('Upload error');

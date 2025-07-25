@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 "use client";
 
 import {
@@ -33,9 +34,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import HandleLogout from "@/components/reusable/Handle-logout";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 type NavItem = {
   title: string;
@@ -47,49 +49,71 @@ const topNav: NavItem[] = [
   { title: "Dashboard", url: "/Student", icon: LayoutDashboard },
   { title: "Profile", url: "/ViewProfile", icon: User2 },
   { title: "Inbox", url: "/Inbox", icon: Inbox },
-  { title: "Courses", url: "/", icon: BookCopyIcon },
-  { title: "TimeTable", url: "/", icon: BookOpen },
-  { title: "Grades", url: "/", icon: BookUserIcon },
+  { title: "Courses", url: "/Student/StuCourses", icon: BookCopyIcon },
+  { title: "TimeTable", url: "/Comming-soon", icon: BookOpen },
+  { title: "Grades", url: "/Comming-soon", icon: BookUserIcon },
 ];
 
 export default function StuSidebar() {
+  const { data: session } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    async function getUnreadCount() {
-      try {
-        const res = await fetch("/api/materials/Inbox");
-        const data = await res.json();
+  // Shared function
+const fetchUnread = useCallback(async () => {
+  if (!session?.user?.id) return;
 
-        if (!Array.isArray(data)) {
-          setUnreadCount(0);
-          return;
-        }
+  try {
+    const res = await fetch("/api/materials/Inbox");
+    const data = await res.json();
 
-        const readIds = (() => {
-          if (typeof window === "undefined") return [];
-          try {
-            const stored = localStorage.getItem("readMessages");
-            return stored ? JSON.parse(stored) : [];
-          } catch {
-            return [];
-          }
-        })();
-
-        const unread = data.filter((msg) => !readIds.includes(msg._id));
-        setUnreadCount(unread.length);
-      } catch {
-        setUnreadCount(0);
-      }
+    if (!Array.isArray(data)) {
+      setUnreadCount(0);
+      return;
     }
 
-    getUnreadCount();
+    const readIds = (() => {
+      if (typeof window === "undefined") return [];
+      try {
+        const stored = localStorage.getItem(`readMessages_${session.user.id}`);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    })();
 
-    const interval = setInterval(getUnreadCount, 300000); // refresh every 30s
+    const unreadMessages = data.filter(
+      (msg: { _id: string }) => !readIds.includes(msg._id)
+    );
 
+    setUnreadCount(unreadMessages.length);
+  } catch {
+    setUnreadCount(0);
+  }
+}, [session?.user?.id]); //  include only what fetchUnread actually depends on
+
+
+  // Initial + polling fetch
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 3000);
     return () => clearInterval(interval);
-  }, []);
-const { data: session } = useSession();
+  }, [session?.user?.id, fetchUnread]);
+
+  // Refetch on route change
+  useEffect(() => {
+    if (pathname === "/Inbox") {
+      fetchUnread();
+    }
+  }, [pathname, session?.user?.id, fetchUnread]);
+
+  // Listen to "messageRead" event
+  useEffect(() => {
+    window.addEventListener("messageRead", fetchUnread);
+    return () => window.removeEventListener("messageRead", fetchUnread);
+  }, [session?.user?.id, fetchUnread]);
 
   return (
     <Sidebar collapsible="icon" className="mt-2">

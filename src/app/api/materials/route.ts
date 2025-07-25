@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/authOptions";
 import Material from "@/app/models/Material";
 import User from "@/app/models/User";
-import  { IUserWithRole } from "@/app/models/Material"; // import the type explicitly
+import  { IUserWithRole } from "@/app/models/Material"; 
 import connectDb from "@/app/libs/ConnectDb";
 
 export async function POST(req: NextRequest) {
@@ -43,10 +43,10 @@ export async function POST(req: NextRequest) {
     if (me.role === 'teacher') {
       console.log("User is teacher. Fetching students in class:", me.classId);
       const students = await User.find({ role: 'student', classId: me.classId });
-      const studentIds = students.map(s => s._id.toString());
+      const studentIds = students.map( s => s._id.toString());
       console.log("Found student IDs:", studentIds);
 
-      finalExplicitUsers = finalExplicitUsers.filter(id => studentIds.includes(id));
+      finalExplicitUsers = finalExplicitUsers.filter( (id: String) => studentIds.includes(id));
       console.log("Filtered explicitUsers for teacher:", finalExplicitUsers);
 
       if (finalExplicitUsers.length === 0) {

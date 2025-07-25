@@ -33,7 +33,10 @@ interface CreateFanOut {
 
 // Define MaterialModel static methods
 interface MaterialModel extends Model<IMaterial> {
+  // eslint-disable-next-line no-unused-vars
   createAndFanOut(args: CreateFanOut): Promise<IMaterial>;
+
+  
 }
 
 // Define schema

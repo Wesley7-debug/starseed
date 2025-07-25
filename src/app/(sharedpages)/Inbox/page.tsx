@@ -23,12 +23,12 @@ export default function InboxPage() {
   const user = {
     id: session?.user.id,
     role: session?.user.role,
-    name: session?.user.name, // You had session.user.id again here
+    name: session?.user.name, 
   };
   const READ_STORAGE_KEY = `readMessages_${user.id}`;
 
   const [messages, setMessages] = useState<Material[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
 const getReadMessages = useCallback((): string[] => {

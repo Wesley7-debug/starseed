@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,12 +17,13 @@ import { CourseSuggestion } from "./CourseSuggestion";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { Course } from "./page";
 
 interface Props {
   open: boolean;
   initial?: { subject: string; courseId: string; department: string | null };
   loading: boolean;
-  onSave: (subjects: string, department: string | null) => void;
+  onSave: (courses: Course[]) => void;
   onClose: () => void;
 }
 
@@ -99,10 +102,7 @@ export function AddCourseModal({
       }
 
       toast.success("Courses added successfully!");
-      onSave(
-        payload.map((c) => c.subject).join(", "),
-        null
-      );
+       await onSave(payload)
 
       onClose();
     } catch {

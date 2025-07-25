@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { DefaultSession, DefaultUser } from "next-auth"
 import { JWT as DefaultJWT } from "next-auth/jwt"
 import {  Role } from "../models/User"
@@ -11,6 +12,7 @@ declare module "next-auth" {
       classId?: string
       role: Role
       RegNo: string
+      avatarUrl: string
     
     
     } & DefaultSession["user"]
@@ -22,7 +24,7 @@ declare module "next-auth" {
     classId?: string
     role: Role
     RegNo: string
-
+avatarUrl: string
   }
 }
 
@@ -32,6 +34,6 @@ declare module "next-auth/jwt" {
    role: Role
     classId?: string
     RegNo?: string
-
+avatarUrl: string
   }
 }

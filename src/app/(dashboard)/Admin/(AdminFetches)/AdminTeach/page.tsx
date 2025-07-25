@@ -35,7 +35,7 @@ export default function AdminTeach() {
   const [searchQuery, setSearchQuery] = useState("");
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
+  const [selectedClassId] = useState<string | undefined>(undefined);
   const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 

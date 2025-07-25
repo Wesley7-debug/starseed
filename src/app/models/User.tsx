@@ -1,5 +1,4 @@
 
-// This file defines the User model for a MongoDB database using Mongoose.
 import mongoose, { Schema, Document, model, Types, models } from 'mongoose'
 
 
@@ -13,15 +12,10 @@ export interface IUser extends Document {
   students: Types.ObjectId[];
   department:string
   courses:string[]
-  // switchProfile: (profileIndex: number) => Promise<IUser> 
+  avatarUrl:string
+
 }
 
-
-// const profileSchema = new Schema<Profile>({
-//   profile: { type: String, required: true },
-//   avatarUrl: { type: String, default: '' }
-// }, { _id: false // Disable automatic _id generation for subdocuments
-// })
 
 const UserSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
@@ -37,10 +31,10 @@ const UserSchema: Schema<IUser> = new Schema({
     required: true,
     unique: true,
   },
-  
+  avatarUrl: { type: String},
   classId: {
     type: String,
-    required: function (this: IUser) {
+    required: function () {
       return this.role === 'student' || this.role === 'teacher'
     },
   },
@@ -53,15 +47,6 @@ courses: {
   type: [String],
   default: [],
 },
-
-  // teacher: {
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'User'
-  // },
-  // students: [{
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'User'
-  //   }],
 
 
 },

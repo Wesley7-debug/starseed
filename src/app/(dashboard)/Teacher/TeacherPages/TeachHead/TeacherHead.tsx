@@ -13,6 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import HandleLogout from "@/components/reusable/Handle-logout"
+import Link from "next/link"
 export default function TeacherHeader() {
  
   
@@ -33,10 +35,16 @@ export default function TeacherHeader() {
 </Avatar>
   </DropdownMenuTrigger>
   <DropdownMenuContent>
-    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-    <DropdownMenuSeparator/>
-    <DropdownMenuItem>Profile</DropdownMenuItem>
-    <DropdownMenuItem>Logout</DropdownMenuItem>
+     <DropdownMenuLabel>My Account</DropdownMenuLabel>
+     <DropdownMenuSeparator/>
+     <DropdownMenuItem>
+       <span>
+         <Link href='/ViewProfile'>
+         View Profile
+         </Link>
+       </span>
+       </DropdownMenuItem>
+     <DropdownMenuItem><HandleLogout/></DropdownMenuItem>
 
   </DropdownMenuContent>
 </DropdownMenu>

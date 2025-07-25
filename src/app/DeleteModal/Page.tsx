@@ -24,7 +24,7 @@ export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
   const [loading, setLoading] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  const normalizedName = name.replace(/\s+/g, "").toLowerCase(); // no spaces, lowercase
+  const normalizedName = name.replace(/\s+/g, "").toLowerCase(); 
 
   const handleDelete = async () => {
     setLoading(true);
@@ -40,7 +40,7 @@ export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
 
       toast.success("User deleted successfully!");
       setOpen(false);
-      setConfirmInput(""); // reset input
+      setConfirmInput(""); 
        if (onSuccess) onSuccess();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong.");

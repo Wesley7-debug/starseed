@@ -93,18 +93,12 @@ export async function POST(req: Request): Promise<Response> {
       { message: "unauthorized role" },
       { status: 403 }
     );
-  }  catch (error: unknown) {
-  console.error("Registration error:", error);
-  return NextResponse.json(
-    {
-      message: "error occurred",
-      error: error?.message || "Unknown error",
-      details: error?.errors || null
-    },
-    { status: 500 }
-  );
+  }  catch (error) {
+    console.error("Error adding user:", error);
+    return new Response(JSON.stringify({ message: "Internal server error" }), { status: 500 });
+  };
 }
-}
+
 
 
 // GET handler - to fetch users with optional filtering
@@ -127,16 +121,9 @@ export async function GET(req: RequestWithUrl): Promise<Response> {
       { data: users, message: "found all" },
       { status: 200 }
     );
-  } catch (error: unknown) {
-  console.error("Registration error:", error);
-  return NextResponse.json(
-    {
-      message: "error occurred",
-      error: error?.message || "Unknown error",
-      details: error?.errors || null
-    },
-    { status: 500 }
-  );
-}
+  } catch (error) {
+    console.error("Error getting user:", error);
+    return new Response(JSON.stringify({ message: "Internal server error" }), { status: 500 });
+  }
 }
 

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
+  // eslint-disable-next-line no-undef
   children: React.ReactNode;
 }>) {
   return (

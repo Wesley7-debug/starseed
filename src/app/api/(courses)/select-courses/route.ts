@@ -33,13 +33,13 @@ export async function POST(req: NextRequest) {
     //  Determine if user is in a senior class
     const isSenior = ["ss1", "ss2", "ss3", "SS1", "SS2", "SS3"].includes(user.classId ?? "");
 
-    //  Require department if student is in senior secondary
-    if (isSenior && !department) {
-      return NextResponse.json(
-        { error: "Department is required for senior secondary students" },
-        { status: 400 }
-      );
-    }
+    // //  Require department if student is in senior secondary
+    // if (isSenior && !department) {
+    //   return NextResponse.json(
+    //     { error: "Department is required for senior secondary students" },
+    //     { status: 400 }
+    //   );
+    // }
 
     //  Courses array must be provided
     if (!Array.isArray(courses) || courses.length === 0) {
@@ -107,7 +107,7 @@ export async function GET() {
     }
 
     //  Check if user is a senior student
-    const isSenior = ["ss1", "ss2", "ss3", "SS1", "SS2", "SS3"].includes(user.classId ?? "");
+    const isSenior = ["ss1", "ss2", "ss3", "Ss-1", "Ss-2", "Ss-3"].includes(user.classId ?? "");
 
     //  Find courses for user's class and department (null for junior)
     const courses = await Course.find({

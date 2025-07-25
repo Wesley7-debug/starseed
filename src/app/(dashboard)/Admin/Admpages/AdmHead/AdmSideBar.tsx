@@ -42,6 +42,7 @@ import HandleLogout from "../../../../../components/reusable/Handle-logout";
 type NavItem = {
   title: string;
   url: string;
+  // eslint-disable-next-line no-undef
   icon: React.ElementType;
 };
 

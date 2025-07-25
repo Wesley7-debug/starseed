@@ -1,83 +1,120 @@
 'use client';
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import Register from "@/app/Register/page";
 import EditUser from "@/app/EditModal/page";
-import DeleteUser from "@/app/DeleteModal/Page";
-import { usERrs } from "@/app/(dashboard)/Admin/Admpages/AdmCharts/user";
-
+import { useSession } from "next-auth/react";
 
 export default function AdminStu() {
- 
-  
+  const { data: session } = useSession();
+  const teacherClassId = session?.user.classId;
+
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredUsers = usERrs.filter(user => {
+  // Fetch users when teacherClassId becomes available
+  useEffect(() => {
+    if (!teacherClassId) return;
 
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return   matchesSearch && user.classId ==='primary-1';
-  });
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch(
+          `/api/user?classId=${teacherClassId}&role=student`
+        );
+        const data = await res.json();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchUsers();
+  }, [teacherClassId]);
 
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const noStudents = !loading && users.length === 0;
+  const noMatches = users.length > 0 && filteredUsers.length === 0;
+
+  if (loading || !teacherClassId) {
+    return <div className="p-6 text-gray-500">Loading students...</div>;
+  }
 
   return (
     <div className="px-6 py-6 rounded-lg border-2 space-y-4 w-full">
       {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex gap-4">
-
-          
-        {/* Search */}
-        <Input
-          placeholder="Search name..."
-          className="w-[150px] rounded-xl"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
+          <Input
+            placeholder="Search name..."
+            className="w-[150px] rounded-xl"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-<Register/>
+        <Register />
       </div>
 
-     
-        {/* Scrollable Area */}
-        {/* Table */}
-        <Table>
-          <TableHeader>
+      {/* Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>S/N</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Class ID</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {noStudents ? (
             <TableRow>
-              <TableHead>S/N</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Class ID</TableHead>
-             
-              <TableHead>Actions</TableHead> {/* New column */}
+              <TableCell colSpan={4} className="text-center">
+                No students assigned to you.
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUsers.map((user, index) => (
+          ) : noMatches ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center">
+                No matching students.
+              </TableCell>
+            </TableRow>
+          ) : (
+            filteredUsers.map((user, index) => (
               <TableRow key={user.id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.classId}</TableCell>
-            
-                <TableCell className="flex gap-10">
-
-                  <EditUser
-                    id={user.id}
-                    name={user.name ?? ""}
-                    RegNo={user.RegNo ?? ""}
-                    classId={user.classId ?? ""}
-                    role={user.role ?? ""}
-                  />
-
-                                    <DeleteUser id={user.id} />
+                <TableCell>
+                  <div className="flex gap-10">
+                    <EditUser
+                      id={user.id}
+                      name={user.name ?? ""}
+                      RegNo={user.RegNo ?? ""}
+                      classId={user.classId ?? ""}
+                      role={user.role ?? ""}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-     
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

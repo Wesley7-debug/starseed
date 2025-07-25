@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { promoteStudents } from "@/hooks/Use-promoteStuu";
 import { promotionMap } from "@/lib/PromotionMap";
 import { toast } from "sonner";
 import { PromoteConfirmPromoteModal } from "./PromoteModal";
+import { promoteStudents } from "@/app/hooks/Use-promoteStuu";
 
 interface User {
   _id: string;

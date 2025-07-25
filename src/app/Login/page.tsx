@@ -27,16 +27,17 @@ export default function Login() {
     if (res?.ok) {
          const user = await fetch('/api/auth/me').then(data => data.json())
       if(user?.role === 'student'){
-  
+
+  //saves students to local storage
         addUserToSaved({
           RegNo: user.RegNo,
           name: user.name,
           avatarUrl: user.avatarUrl
         });
-  console.log(`Attempted to save student: ${user.RegNo}`);
+ // console.log(`Attempted to save student: ${user.RegNo}`);
       }
       setLoading(false);
-      redirect('/Dashboard');
+      redirect('/Redirecting');
     }
 
 if(res?.error) {
