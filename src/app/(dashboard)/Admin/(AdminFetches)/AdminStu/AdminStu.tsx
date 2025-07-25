@@ -13,13 +13,13 @@ import {
 
 import { Search, Filter } from "lucide-react";
 import Register from "@/app/Register/page";
-import EditUser from "@/app/EditModal/page";
 import DeleteUser from "@/app/DeleteModal/Page";
 import PromoteButton from "./PromoteStu/PromoteButton";
 import DemoteButton from "./Demote/DemteButton";
 import { Role } from "@/app/models/User";
 import { useDebounce } from "@/app/hooks/Usedebounce";
 import Link from "next/link";
+import EditUser from "@/components/reusable/EditModal";
 
 type ClassId =
   | `primary-${1 | 2 | 3 | 4 | 5 | 6}`

@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/table";
 
 import Register from "@/app/Register/page";
-import EditUser from "@/app/EditModal/page";
 import { useSession } from "next-auth/react";
+import EditUser from "@/components/reusable/EditModal";
 
 export default function AdminStu() {
   const { data: session } = useSession();

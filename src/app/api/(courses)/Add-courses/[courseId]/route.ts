@@ -63,7 +63,7 @@ import User from "@/app/models/User";
 // DELETE: Remove a course
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { courseId?: string } }
+  { params }: { params: { courseId: string } }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -71,7 +71,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-const { courseId } = await params;
+const { courseId } =  params;
 
   if (!courseId) {
     return NextResponse.json({ error: "Course ID is missing" }, { status: 400 });

@@ -19,9 +19,9 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import Register from "@/app/Register/page";
-import EditUser from "@/app/EditModal/page";
 import DeleteUser from "@/app/DeleteModal/Page";
 import { useDebounce } from "@/app/hooks/Usedebounce";
+import EditUser from "@/components/reusable/EditModal";
 
 interface Teacher {
   _id: string;
