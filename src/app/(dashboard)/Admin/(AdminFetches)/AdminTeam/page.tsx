@@ -19,7 +19,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDebounce } from "@/app/hooks/Usedebounce";
-import Register from "@/app/Register/page";
+import Register from "@/components/reusable/Register";
+
 
 
 interface User {

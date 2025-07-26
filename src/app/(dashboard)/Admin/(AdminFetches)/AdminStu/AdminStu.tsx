@@ -12,14 +12,14 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import { Search, Filter } from "lucide-react";
-import Register from "@/app/Register/page";
-import DeleteUser from "@/app/DeleteModal/Page";
+import DeleteUser from "@/components/reusable/DeleteModal";
 import PromoteButton from "./PromoteStu/PromoteButton";
 import DemoteButton from "./Demote/DemteButton";
 import { Role } from "@/app/models/User";
 import { useDebounce } from "@/app/hooks/Usedebounce";
 import Link from "next/link";
 import EditUser from "@/components/reusable/EditModal";
+import Register from "@/components/reusable/Register";
 
 type ClassId =
   | `primary-${1 | 2 | 3 | 4 | 5 | 6}`

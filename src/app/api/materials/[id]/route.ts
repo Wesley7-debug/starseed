@@ -1,3 +1,4 @@
+ 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/authOptions";
@@ -5,14 +6,19 @@ import connectDb from "@/app/libs/ConnectDb";
 import Material from "@/app/models/Material";
 import User from "@/app/models/User";
 
+// type RouteContext<T extends Record<string, string> = {}> = {
+//   params: T;
+// };
+
 // PATCH: Update a material
-export async function PATCH(req: NextRequest,  context:{ params: { id: string } }) {
+export async function PATCH(req: NextRequest,  context: { params: { id: string } }
+) {
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-      const params = await context.params;  // Await params here
+      const params =  context.params; 
     const { id } = params;
 
     if (!id || typeof id !== "string") {
@@ -50,14 +56,14 @@ export async function PATCH(req: NextRequest,  context:{ params: { id: string } 
 }
 
 // DELETE: Delete a material
-export async function DELETE(req: NextRequest,   context:{ params: { id: string } }) {
+export async function DELETE(req: NextRequest,   context: { params: { id: string } }
+) {
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-      const params = await context.params;  // Await params here
-    const { id } = params;
+    const { id } = context.params;
 
     if (!id || typeof id !== "string") {
         return NextResponse.json({ error: "Invalid material ID" }, { status: 400 });

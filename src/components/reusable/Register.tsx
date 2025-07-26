@@ -20,7 +20,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { PlusCircle } from "lucide-react";
-import { useClientAuth } from "../hooks/UseClientAuth";
+import { useClientAuth } from "../../app/hooks/UseClientAuth";
 
 type FormData = {
   classId?: string;

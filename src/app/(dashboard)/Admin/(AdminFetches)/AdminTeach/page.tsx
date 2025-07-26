@@ -18,10 +18,11 @@ import {
   BreadcrumbSeparator,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import Register from "@/app/Register/page";
-import DeleteUser from "@/app/DeleteModal/Page";
+import DeleteUser from "@/components/reusable/DeleteModal";
 import { useDebounce } from "@/app/hooks/Usedebounce";
 import EditUser from "@/components/reusable/EditModal";
+import Register from "@/components/reusable/Register";
+
 
 interface Teacher {
   _id: string;

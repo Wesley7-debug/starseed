@@ -10,10 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import Register from "@/app/Register/page";
 import { useSession } from "next-auth/react";
 import EditUser from "@/components/reusable/EditModal";
+import Register from "@/components/reusable/Register";
 
 export default function AdminStu() {
  const { data: session } = useSession();
