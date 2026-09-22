@@ -1,10 +1,14 @@
 'use client';
+
 import { useState } from 'react';
 
 export function useUpdateMaterials(onSuccess?: () => void) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const updateCourse = async (id: string, data: { title?: string; content?: string }) => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/materials/${id}`, {
         method: 'PATCH',
@@ -14,11 +18,11 @@ export function useUpdateMaterials(onSuccess?: () => void) {
       if (!res.ok) throw new Error('Update failed');
       onSuccess?.();
     } catch (err) {
-      console.error(err);
-      alert(err);
+      setError(err instanceof Error ? err.message : 'Failed to update');
     } finally {
       setLoading(false);
     }
   };
-  return { updateCourse, loading };
+
+  return { updateCourse, loading, error };
 }

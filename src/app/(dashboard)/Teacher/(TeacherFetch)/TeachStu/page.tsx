@@ -13,6 +13,8 @@ import {
 import { useSession } from "next-auth/react";
 import EditUser from "@/components/reusable/EditModal";
 import Register from "@/components/reusable/Register";
+import PageHeader from "@/components/reusable/PageHeader";
+import { GraduationCap } from "lucide-react";
 
 export default function AdminStu() {
  const { data: session } = useSession();
@@ -55,7 +57,12 @@ export default function AdminStu() {
   }
 
   return (
-    <div className="px-6 py-6 rounded-lg border-2 space-y-4 w-full">
+    <div className="px-6 py-6 rounded-lg space-y-4 w-full">
+      <PageHeader
+        title="My Students"
+        description="Students in your class"
+        icon={<GraduationCap className="size-5" />}
+      />
       {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex gap-4">
@@ -66,7 +73,7 @@ export default function AdminStu() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Register />
+        <Register forcedRole="student" />
       </div>
 
       {/* Table */}

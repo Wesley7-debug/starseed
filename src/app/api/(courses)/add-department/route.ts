@@ -2,8 +2,8 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/authOptions';
 import { NextResponse,NextRequest } from 'next/server';
-import connectDb from '@/app/libs/ConnectDb';
-import User from '@/app/models/User';
+import connectDb from '@/lib/ConnectDb';
+import User from '@/models/User';
 
 
 export async function PATCH(req:NextRequest ) {

@@ -1,113 +1,91 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import {
-  Users,
-  Presentation,
-  GraduationCap,
-
-} from 'lucide-react';
-
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { BookCopy, BookOpen, AlertCircle, TrendingUp } from "lucide-react";
+import StatCard from "@/components/reusable/StatCard";
 
 interface Courses {
   subject: string;
   department: string;
-  // other user fields if needed
 }
 
 export default function StuCard() {
-  const [courses, setcourses] = useState <Courses[]>([])
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Courses[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchUsers() {
+    async function fetchCourses() {
       try {
         setLoading(true);
-        const res = await fetch('/api/select-courses');
-        if (!res.ok) throw new Error('Failed to fetch users');
-
+        const res = await fetch("/api/select-courses");
+        if (!res.ok) throw new Error("Failed to fetch courses");
         const json = await res.json();
-        setcourses(json.data || []);
+        setCourses(json.data || []);
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     }
-    fetchUsers();
+    fetchCourses();
   }, []);
 
-  // Calculate counts
-  const TotalCourses = courses.length;
-
+  const totalCourses = courses.length;
 
   if (loading) {
-    return <div className="text-center py-10">Loading dashboard data...</div>;
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="ax-card ax-stat animate-pulse p-5" style={{ minHeight: 156 }}>
+            <div className="ax-stat-icon mb-3" style={{ background: "var(--ax-surface-soft)" }} />
+            <div className="mb-1 h-3 w-20 rounded" style={{ background: "var(--ax-surface-soft)" }} />
+            <div className="h-7 w-16 rounded" style={{ background: "var(--ax-surface-soft)" }} />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-600 py-10">Error: {error}</div>;
+    return (
+      <div className="ax-card p-4 text-sm" style={{ color: "#ef4444" }}>
+        Error loading courses: {error}
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-      {/* Total Users */}
-      <Card className="lg:col-span-2 md:col-span-2">
-        <CardHeader className="flex flex-row items-center gap-2">
-          <Users className="w-6 h-6 text-blue-600" />
-          <CardTitle>Total Courses</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-4xl font-bold border border-dashed p-2 w-fit rounded">
-           54
-          </div>
-
-        </CardContent>
-      </Card>
-
-      {/* Teachers */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2">
-          <Presentation className="w-6 h-6 text-green-600" />
-          <CardTitle>courses Offered</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <div className="text-3xl font-bold border border-dashed p-2 w-fit rounded">
-            {TotalCourses.toLocaleString()}
-          </div>
-          <CardDescription className="border-t pt-1 text-sm">
-            Active Courses
-          </CardDescription>
-        </CardContent>
-      </Card>
-
-      {/* Students */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2">
-          <GraduationCap className="w-6 h-6 text-purple-600" />
-          <CardTitle>Mandatory</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <div className="text-3xl font-bold border border-dashed p-2 w-fit rounded">
-           4
-          </div>
-          <CardDescription className="border-t pt-1 text-sm">
-          Must Have
-          </CardDescription>
-        </CardContent>
-      </Card>
-
-
-
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        title="Total Courses"
+        value={54}
+        icon={BookCopy}
+        variant="lavender"
+        description="Available courses"
+      />
+      <StatCard
+        title="Enrolled"
+        value={totalCourses.toLocaleString()}
+        icon={BookOpen}
+        variant="mint"
+        description="Active courses"
+      />
+      <StatCard
+        title="Mandatory"
+        value={4}
+        icon={AlertCircle}
+        variant="peach"
+        description="Must-have courses"
+      />
+      <StatCard
+        title="Performance"
+        value="85%"
+        icon={TrendingUp}
+        variant="yellow"
+        trend={{ value: "5%", positive: true }}
+        description="this semester"
+      />
     </div>
   );
 }

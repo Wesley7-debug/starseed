@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DepartmentModal from './DepartmentModal';  
+import DepartmentModal from './DepartmentModal';
 import RegisteredCoursesTable from './CourseTable';
 import CourseRegistrationModal from './CourseRegistartion';
 import { Button } from '@/components/ui/button';
-import useUserCourses from '@/app/hooks/Use-Usercourse';
+import useUserCourses from '@/hooks/Use-Usercourse';
+import PageHeader from '@/components/reusable/PageHeader';
+import { BookCopy, Plus } from 'lucide-react';
 
 export default function RegistrationGuard() {
   const { user, courses, loading, error, refetch } = useUserCourses();
@@ -25,7 +27,6 @@ export default function RegistrationGuard() {
     setIsSenior(senior);
     setNeedsDepartment(senior && !hasDepartment);
 
-    // Course registration cooldown
     const lastReg = localStorage.getItem('lastCourseRegistration');
     if (lastReg) {
       const diffDays = (Date.now() - parseInt(lastReg, 10)) / (1000 * 60 * 60 * 24);
@@ -42,30 +43,38 @@ export default function RegistrationGuard() {
   if (!user) return <div>Not found</div>;
 
   return (
-    <>
-      {/* Show department selection UI for seniors without department */}
-      {needsDepartment && (
-        <>
-          
-          <DepartmentModal
-            user={user}
-            onSet={async () => {
-              setNeedsDepartment(false);
-              await refetch();
-            }}
-          />
-        </>
-      )}
-
-      {/* Show register button and courses for all non-seniors, and for seniors with a department */}
-      {!needsDepartment && (
-        <>
-          {(!isSenior || (isSenior && user.department)) && !hideRegisterButton && (
-            <Button className="mb-4" onClick={() => setShowCourseModal(true)}>
+    <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:px-8 lg:py-7 space-y-6">
+      <PageHeader
+        title="My Courses"
+        description="View and register for courses"
+        icon={<BookCopy className="size-5" />}
+        actions={
+          !needsDepartment &&
+          (!isSenior || (isSenior && user.department)) &&
+          !hideRegisterButton ? (
+            <Button
+              onClick={() => setShowCourseModal(true)}
+              className="rounded-xl bg-[#8c6be8] text-white hover:bg-[#7a5bd4] shadow-sm"
+            >
+              <Plus className="mr-1.5 size-4" />
               Register Courses
             </Button>
-          )}
+          ) : undefined
+        }
+      />
 
+      {needsDepartment && (
+        <DepartmentModal
+          user={user}
+          onSet={async () => {
+            setNeedsDepartment(false);
+            await refetch();
+          }}
+        />
+      )}
+
+      {!needsDepartment && (
+        <>
           {showCourseModal && (
             <CourseRegistrationModal
               user={user}
@@ -83,6 +92,6 @@ export default function RegistrationGuard() {
           <RegisteredCoursesTable courses={courses} />
         </>
       )}
-    </>
+    </div>
   );
 }

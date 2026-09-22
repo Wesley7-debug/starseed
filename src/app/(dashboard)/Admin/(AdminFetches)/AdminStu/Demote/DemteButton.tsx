@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-
 import { demotionMap } from "@/lib/DemotionMap";
 import { toast } from "sonner";
 import { DemoteConfirmModal } from "./Demotemodal";
-import { demoteStudents } from "@/app/hooks/Use-demotestu";
-
+import { demoteStudents } from "@/hooks/Use-demotestu";
+import { ArrowDown } from "lucide-react";
 
 interface User {
   _id: string;
@@ -27,7 +25,7 @@ export default function DemoteButton({ selectedIds, students, onSuccess }: Props
 
   const handleDemoteClick = () => {
     if (selectedIds.length === 0) {
-      alert("No students selected");
+      toast.error("No students selected");
       return;
     }
     setModalOpen(true);
@@ -53,12 +51,13 @@ export default function DemoteButton({ selectedIds, students, onSuccess }: Props
 
   return (
     <>
-      <Button
+      <button
         onClick={handleDemoteClick}
-        className="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-red-300/30 bg-red-50 px-3.5 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-100"
       >
+        <ArrowDown className="size-3.5" />
         Demote
-      </Button>
+      </button>
 
       <DemoteConfirmModal
         open={modalOpen}

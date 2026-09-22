@@ -1,7 +1,7 @@
-/* eslint-disable no-unused-vars */
+ 
 import { DefaultSession, DefaultUser } from "next-auth"
 import { JWT as DefaultJWT } from "next-auth/jwt"
-import {  Role } from "../models/User"
+import {  Role } from "@/models/User"
 
 
 declare module "next-auth" {

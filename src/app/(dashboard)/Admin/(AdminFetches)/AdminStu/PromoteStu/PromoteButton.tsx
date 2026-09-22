@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { promotionMap } from "@/lib/PromotionMap";
 import { toast } from "sonner";
 import { PromoteConfirmPromoteModal } from "./PromoteModal";
-import { promoteStudents } from "@/app/hooks/Use-promoteStuu";
+import { promoteStudents } from "@/hooks/Use-promoteStuu";
+import { ArrowUp } from "lucide-react";
 
 interface User {
   _id: string;
@@ -25,7 +25,7 @@ export default function PromoteButton({ selectedIds, students, onSuccess }: Prop
 
   const handlePromoteClick = () => {
     if (selectedIds.length === 0) {
-      alert("No students selected");
+      toast.error("No students selected");
       return;
     }
     setModalOpen(true);
@@ -34,7 +34,6 @@ export default function PromoteButton({ selectedIds, students, onSuccess }: Prop
   const handleConfirm = async () => {
     setModalOpen(false);
 
-    // Use exact case key matching, no toLowerCase
     const updates = toPromote.map((s) => ({
       id: s._id,
       newClassId: promotionMap[s.classId] || s.classId,
@@ -52,12 +51,13 @@ export default function PromoteButton({ selectedIds, students, onSuccess }: Prop
 
   return (
     <>
-      <Button
+      <button
         onClick={handlePromoteClick}
-        className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-[#2ba866]/30 bg-[#2ba866]/10 px-3.5 py-2 text-sm font-medium text-[#2ba866] transition-all hover:bg-[#2ba866]/20"
       >
+        <ArrowUp className="size-3.5" />
         Promote
-      </Button>
+      </button>
 
       <PromoteConfirmPromoteModal
         open={modalOpen}

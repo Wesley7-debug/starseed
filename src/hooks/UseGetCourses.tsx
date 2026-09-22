@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
 
 interface Student {
   name: string;
@@ -16,7 +18,7 @@ interface CourseStudents {
 
 interface UseSpecialCoursesParams {
   teacherId: string;
-  courses?: string[]; // optional filtering
+  courses?: string[];
 }
 
 export function useSpecialCourses({ teacherId, courses }: UseSpecialCoursesParams) {
@@ -32,24 +34,23 @@ export function useSpecialCourses({ teacherId, courses }: UseSpecialCoursesParam
       setError(null);
 
       try {
-        const query = courses?.length ? `?courses=${courses.join(",")}` : "";
+        const query = courses?.length ? `?courses=${courses.join(',')}` : '';
         const res = await fetch(`/api/teacher/${teacherId}/special-courses${query}`);
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error || "Something went wrong");
+          throw new Error(errorData.error || 'Something went wrong');
         }
 
         const result = await res.json();
         setData(result.students || []);
       } catch (err: unknown) {
-  if (err instanceof Error) {
-    setError(err.message);
-  } else {
-    setError("Unknown error occurred");
-  }
-}
- finally {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Unknown error occurred');
+        }
+      } finally {
         setLoading(false);
       }
     };

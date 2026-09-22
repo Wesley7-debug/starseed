@@ -19,9 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
-import { useClientAuth } from "../../app/hooks/UseClientAuth";
-import { Pen } from "lucide-react";
+import { useClientAuth } from "@/hooks/UseClientAuth";
+import { Pencil } from "lucide-react";
 
 type FormData = {
   classId: string;
@@ -38,7 +37,8 @@ type EditUserProps = {
   classId: string;
   role: string;
   RegNo: string;
-   onSuccess?: () => void;
+  onSuccess?: () => void;
+  hidden?: boolean;
 };
 
 const VALID_CLASS_IDS = [
@@ -51,14 +51,18 @@ const VALID_CLASS_IDS = [
 
 const normalizeClassId = (value: string): string => {
   const cleaned = value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-
   if (cleaned.startsWith("prenursery")) return "Pre-nursery";
   if (cleaned.startsWith("nursery")) return `Nursery-${cleaned.slice(7)}`;
   if (cleaned.startsWith("primary")) return `Primary-${cleaned.slice(7)}`;
   if (cleaned.startsWith("jss")) return `Jss-${cleaned.slice(3)}`;
   if (cleaned.startsWith("ss")) return `Ss-${cleaned.slice(2)}`;
-
   return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  student: "Student",
+  teacher: "Teacher",
+  admin: "Administrator",
 };
 
 export default function EditUser({
@@ -67,11 +71,13 @@ export default function EditUser({
   classId,
   role,
   RegNo,
-  onSuccess
+  onSuccess,
+  hidden,
 }: EditUserProps) {
   const { status, session } = useClientAuth();
-
   const [open, setOpen] = useState(false);
+
+  if (hidden) return null;
   const [editFormData, setEditFormData] = useState<FormData>({
     name: "",
     classId: "",
@@ -83,23 +89,17 @@ export default function EditUser({
 
   useEffect(() => {
     if (open) {
-      setEditFormData({
-        name,
-        classId,
-        role,
-        RegNo,
-      });
+      setEditFormData({ name, classId, role, RegNo });
     }
   }, [open, name, classId, role, RegNo]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    if (name === "classId") {
+    const { name: field, value } = e.target;
+    if (field === "classId") {
       const normalized = normalizeClassId(value);
-      setEditFormData({ ...editFormData, [name]: normalized });
+      setEditFormData({ ...editFormData, [field]: normalized });
     } else {
-      setEditFormData({ ...editFormData, [name]: value });
+      setEditFormData({ ...editFormData, [field]: value });
     }
   };
 
@@ -131,92 +131,107 @@ export default function EditUser({
     return Object.keys(newErrors).length === 0;
   };
 
-const handleEdit = async (e: FormEvent) => {
-  e.preventDefault();
-  if (!validate()) return;
+  const handleEdit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
 
-  setLoading(true);
+    const isAdmin = session?.user?.role === "admin";
+    const payload: FormData = {
+      ...editFormData,
+      role: isAdmin ? editFormData.role : "student",
+      classId: isAdmin ? editFormData.classId : session?.user?.classId || "",
+    };
 
-  const isAdmin = session?.user?.role === "admin";
+    try {
+      const response = await fetch(`/api/user/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+      });
 
-  const payload: FormData = {
-    ...editFormData,
-    role: isAdmin ? editFormData.role : "student",
-    classId: isAdmin ? editFormData.classId : session?.user?.classId || "",
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+
+      toast.success("User updated successfully!");
+      setOpen(false);
+      if (onSuccess) onSuccess();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  try {
-    const response = await fetch(`/api/user/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const result = await response.json();
-
-    if (!result.success) throw new Error(result.message);
-
-    toast.success("User updated successfully!");
-    setOpen(false);
-     if (onSuccess) onSuccess();
-  } catch (err: unknown) {
-    toast.error(err instanceof Error ? err.message : "Something went wrong.");
-  } finally {
-    setLoading(false);
-    
-  }
-};
-
-  if (status === "loading") return <div>Loading...</div>;
+  if (status === "loading") return <div />;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='w-fit p-3' variant="outline" size="icon">
-          <Pen className="h-4 w-4" />
-        </Button>
+        <button
+          className="grid size-8 place-items-center rounded-lg transition-colors hover:bg-[var(--ax-purple-soft)] hover:text-[var(--ax-purple)]"
+          style={{ color: "var(--ax-faint)" }}
+          aria-label="Edit user"
+        >
+          <Pencil className="size-4" />
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-white">
+      <DialogContent className="sm:max-w-[500px] rounded-2xl" style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface)" }}>
         <DialogHeader>
-          <DialogTitle className="text-blue-600">Edit User</DialogTitle>
+          <DialogTitle className="text-lg" style={{ color: "var(--ax-text)" }}>Edit User</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleEdit} className="space-y-4 py-4">
+        <form onSubmit={handleEdit} className="space-y-4 py-2">
           <div>
-            <Label htmlFor="name">Name</Label>
-            <Input name="name" value={editFormData.name} onChange={handleChange} />
-            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+            <Label className="text-sm font-medium" style={{ color: "var(--ax-text)" }}>Name</Label>
+            <Input
+              name="name"
+              value={editFormData.name}
+              onChange={handleChange}
+              className="mt-1.5 rounded-xl"
+              style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface-soft)" }}
+            />
+            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
           </div>
 
           <div>
-            <Label htmlFor="RegNo">Registration Number</Label>
-            <Input name="RegNo" value={editFormData.RegNo} onChange={handleChange} />
-            {errors.RegNo && <p className="text-sm text-red-500">{errors.RegNo}</p>}
+            <Label className="text-sm font-medium" style={{ color: "var(--ax-text)" }}>Registration No.</Label>
+            <div className="mt-1.5 rounded-xl border px-4 py-2.5 font-mono text-sm" style={{ borderColor: "var(--ax-border)", backgroundColor: "#f3f1f8", color: "var(--ax-muted)" }}>
+              {editFormData.RegNo || RegNo}
+            </div>
+            <p className="mt-1 text-xs" style={{ color: "var(--ax-faint)" }}>
+              {ROLE_LABEL[editFormData.role] || editFormData.role} &middot; Read-only
+            </p>
+            {errors.RegNo && <p className="mt-1 text-sm text-red-500">{errors.RegNo}</p>}
           </div>
 
           {session?.user?.role === "admin" && (
             <>
               <div>
-                <Label htmlFor="classId">Class ID</Label>
+                <Label className="text-sm font-medium" style={{ color: "var(--ax-text)" }}>Class ID</Label>
                 <Input
                   name="classId"
                   value={editFormData.classId}
                   onChange={handleChange}
                   autoComplete="off"
-                  list="class-suggestions"
+                  list="class-suggestions-edit"
+                  className="mt-1.5 rounded-xl"
+                  style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface-soft)" }}
                 />
-                <datalist id="class-suggestions">
+                <datalist id="class-suggestions-edit">
                   {getClassSuggestions(editFormData.classId).map((suggestion) => (
                     <option key={suggestion} value={suggestion} />
                   ))}
                 </datalist>
-                {errors.classId && <p className="text-sm text-red-500">{errors.classId}</p>}
+                {errors.classId && (
+                  <p className="mt-1 text-sm text-red-500">{errors.classId}</p>
+                )}
               </div>
 
               <div>
-                <Label>Role</Label>
+                <Label className="text-sm font-medium" style={{ color: "var(--ax-text)" }}>Role</Label>
                 <Select value={editFormData.role} onValueChange={handleSelect}>
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-1.5 rounded-xl" style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface-soft)" }}>
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,7 +240,7 @@ const handleEdit = async (e: FormEvent) => {
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
+                {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role}</p>}
               </div>
             </>
           )}
@@ -233,9 +248,10 @@ const handleEdit = async (e: FormEvent) => {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            className="w-full rounded-xl text-white hover:opacity-90"
+            style={{ backgroundColor: "var(--ax-purple)" }}
           >
-            {loading ? "Editting..." : "Edit"}
+            {loading ? "Saving..." : "Save Changes"}
           </Button>
         </form>
       </DialogContent>

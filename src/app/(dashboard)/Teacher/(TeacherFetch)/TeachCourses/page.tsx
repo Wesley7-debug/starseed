@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AddCourseModal } from './AddCourseModal';
 import { CourseList } from './CourseList';
+import PageHeader from '@/components/reusable/PageHeader';
+import { BookCopy, Plus } from 'lucide-react';
 
 export interface Course {
   courseId: string;
@@ -64,11 +66,20 @@ async function handleSave(courses: Course[]) {
 
   return (
     <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold">My Courses</h1>
-
-      <Button onClick={() => { setEditing(null); setModalOpen(true); }}>
-        + Add Course
-      </Button>
+      <PageHeader
+        title="My Courses"
+        description="Manage your course offerings"
+        icon={<BookCopy className="size-5" />}
+        actions={
+          <Button
+            onClick={() => { setEditing(null); setModalOpen(true); }}
+            className="rounded-xl bg-[#8c6be8] text-white hover:bg-[#7a5bd4] shadow-sm"
+          >
+            <Plus className="mr-1.5 size-4" />
+            Add Course
+          </Button>
+        }
+      />
 
       <CourseList 
         courses={courses} 

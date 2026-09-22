@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Edit } from 'lucide-react';
-
+import { Edit, User } from 'lucide-react';
+import PageHeader from '@/components/reusable/PageHeader';
 
 type Role = 'admin' | 'teacher' | 'student';
 
 interface SessionUser {
-  avatarUrl:string
+  avatarUrl: string;
   id: string;
   name: string;
   phone?: string;
@@ -23,8 +23,7 @@ interface SessionUser {
   imageUrl?: string;
 }
 
-const editableFields: Array<keyof Pick<SessionUser, 'name' |  'phone' | 'classId'>> = [
-
+const editableFields: Array<keyof Pick<SessionUser, 'name' | 'phone' | 'classId'>> = [
   'name',
   'phone',
   'classId',
@@ -75,7 +74,7 @@ export default function ProfileView() {
       const updated = await res.json();
       setFormData(updated);
       setPreview(updated.avatarUrl);
-      await signIn('credentials', { redirect: false }); // refresh session
+      await signIn('credentials', { redirect: false });
       toast.success('Profile updated');
     } catch {
       toast.error('Error saving');
@@ -113,47 +112,65 @@ export default function ProfileView() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-        <div className="relative group w-24 h-24">
-          <Avatar className="w-24 h-24">
-            {preview ? <AvatarImage src={preview} alt="Avatar" /> : <AvatarFallback>{user.name[0]}</AvatarFallback>}
-          </Avatar>
+    <div className="mx-auto max-w-2xl p-4 sm:p-6 lg:px-8 lg:py-7 space-y-6">
+      <PageHeader
+        title="Profile"
+        description="View and edit your profile"
+        icon={<User className="size-5" />}
+      />
 
-          {editMode && canEdit && (
-            <>
-              <label
-                htmlFor="file-upload"
-                className="absolute bottom-0 right-0 bg-blue-600 p-1.5 rounded-full cursor-pointer group-hover:scale-105 transition-transform shadow"
-                title="Change profile image"
-              >
-                <Edit className="text-white w-4 h-4" />
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
+      {/* Avatar Card */}
+      <div className="ax-card p-6">
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+          <div className="relative group w-24 h-24">
+            <Avatar className="w-24 h-24 border-2 border-[#e8e3ee]">
+              {preview ? (
+                <AvatarImage src={preview} alt="Avatar" className="object-cover" />
+              ) : (
+                <AvatarFallback className="bg-[#f0ebff] text-[#8c6be8] text-2xl font-bold">
+                  {user.name[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
+
+            {editMode && canEdit && (
+              <>
+                <label
+                  htmlFor="file-upload"
+                  className="absolute bottom-0 right-0 grid size-8 place-items-center rounded-full bg-[#8c6be8] text-white cursor-pointer group-hover:scale-105 transition-transform shadow-md"
+                  title="Change profile image"
+                >
+                  <Edit className="size-4" />
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
                   aria-label="Upload profile image"
-                disabled={saving}
-              />
-            </>
-          )}
-        </div>
+                  disabled={saving}
+                />
+              </>
+            )}
+          </div>
 
-        <div className="text-center sm:text-left">
-          <h2 className="text-2xl font-semibold">{user.name}</h2>
-       
+          <div className="text-center sm:text-left">
+            <h2 className="text-xl font-bold text-[#1f2130]">{user.name}</h2>
+            <p className="text-sm text-[#777489]">{user.RegNo}</p>
+            <span className="mt-1 inline-flex items-center rounded-full bg-[#f0ebff] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#8c6be8]">
+              {user.role}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      {/* Fields Card */}
+      <div className="ax-card p-6 space-y-4">
+        <h3 className="text-[15px] font-semibold text-[#1f2130]">Personal Information</h3>
         {editableFields.map((field) => (
           <div key={field}>
-            <Label htmlFor={field} className="block mb-1 capitalize">
-              {field}
-            </Label>
+            <Label className="text-sm font-medium text-[#1f2130] capitalize">{field}</Label>
             <Input
               id={field}
               name={field}
@@ -161,23 +178,39 @@ export default function ProfileView() {
               onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
               onBlur={handleBlur}
               disabled={!editMode || (field !== 'phone' && !isAdmin)}
+              className="mt-1.5 rounded-xl border-[#e8e3ee] bg-[#faf8ff]"
             />
           </div>
         ))}
 
         <div>
-          <Label className="block mb-1">Registration Number</Label>
-          <Input value={user.RegNo} disabled className="bg-gray-100" />
+          <Label className="text-sm font-medium text-[#1f2130]">Registration Number</Label>
+          <Input
+            value={user.RegNo}
+            disabled
+            className="mt-1.5 rounded-xl border-[#e8e3ee] bg-[#f3f1f8] text-[#777489]"
+          />
         </div>
         <div>
-          <Label className="block mb-1">Role</Label>
-          <Input value={user.role} disabled className="bg-gray-100" />
+          <Label className="text-sm font-medium text-[#1f2130]">Role</Label>
+          <Input
+            value={user.role}
+            disabled
+            className="mt-1.5 rounded-xl border-[#e8e3ee] bg-[#f3f1f8] text-[#777489]"
+          />
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      {/* Actions */}
+      <div className="flex justify-end gap-2">
         {!editMode ? (
-          <Button onClick={() => setEditMode(true)}>Edit Profile</Button>
+          <Button
+            onClick={() => setEditMode(true)}
+            className="rounded-xl bg-[#8c6be8] text-white hover:bg-[#7a5bd4] shadow-sm"
+          >
+            <Edit className="mr-1.5 size-4" />
+            Edit Profile
+          </Button>
         ) : (
           <>
             <Button
@@ -188,11 +221,16 @@ export default function ProfileView() {
                 setEditMode(false);
               }}
               disabled={saving}
+              className="rounded-xl border-[#e8e3ee] text-[#1f2130]"
             >
               Cancel
             </Button>
-            <Button onClick={() => saveField(formData)} disabled={saving}>
-              {saving ? 'Saving...' : 'Save All'}
+            <Button
+              onClick={() => saveField(formData)}
+              disabled={saving}
+              className="rounded-xl bg-[#8c6be8] text-white hover:bg-[#7a5bd4]"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </>
         )}

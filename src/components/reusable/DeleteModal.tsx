@@ -9,22 +9,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface DeleteUserProps {
   id: string;
   name: string;
-    onSuccess?: () => void;
+  onSuccess?: () => void;
+  hidden?: boolean;
 }
 
-export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
+export default function DeleteUser({ id, name, onSuccess, hidden }: DeleteUserProps) {
   const [open, setOpen] = useState(false);
+
+  if (hidden) return null;
   const [loading, setLoading] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  const normalizedName = name.replace(/\s+/g, "").toLowerCase(); 
+  const normalizedName = name.replace(/\s+/g, "").toLowerCase();
 
   const handleDelete = async () => {
     setLoading(true);
@@ -40,13 +43,12 @@ export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
 
       toast.success("User deleted successfully!");
       setOpen(false);
-      setConfirmInput(""); 
-       if (onSuccess) onSuccess();
+      setConfirmInput("");
+      if (onSuccess) onSuccess();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
-     
     }
   };
 
@@ -55,17 +57,25 @@ export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-fit p-3">
-          <Trash className="h-4 w-4" color="red" />
-          <span className="sr-only">Delete user</span>
-        </Button>
+        <button
+          className="grid size-8 place-items-center rounded-lg transition-colors hover:bg-red-50 hover:text-red-500"
+          style={{ color: "var(--ax-faint)" }}
+          aria-label="Delete user"
+        >
+          <Trash2 className="size-4" />
+        </button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="sm:max-w-md rounded-2xl" style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface)" }}>
         <DialogHeader>
-          <DialogTitle>Delete {name}?</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            To confirm deletion, type <strong>{normalizedName}</strong>
+          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-red-50 text-red-500">
+            <Trash2 className="size-6" />
+          </div>
+          <DialogTitle className="text-center" style={{ color: "var(--ax-text)" }}>
+            Delete &quot;{name}&quot;?
+          </DialogTitle>
+          <p className="text-center text-sm" style={{ color: "var(--ax-muted)" }}>
+            To confirm, type <span className="font-semibold" style={{ color: "var(--ax-text)" }}>{normalizedName}</span>
           </p>
         </DialogHeader>
 
@@ -73,15 +83,28 @@ export default function DeleteUser({ id, name ,onSuccess}: DeleteUserProps) {
           placeholder="Type name to confirm"
           value={confirmInput}
           onChange={(e) => setConfirmInput(e.target.value)}
+          className="rounded-xl"
+          style={{ borderColor: "var(--ax-border)", backgroundColor: "var(--ax-surface-soft)" }}
         />
 
-        <Button
-          onClick={handleDelete}
-          variant="destructive"
-          disabled={!isMatch || loading}
-        >
-          {loading ? "Deleting..." : "Yes, delete"}
-        </Button>
+        <div className="flex gap-2 pt-1">
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="flex-1 rounded-xl"
+            style={{ borderColor: "var(--ax-border)", color: "var(--ax-text)" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="destructive"
+            disabled={!isMatch || loading}
+            className="flex-1 rounded-xl bg-red-600 text-white hover:bg-red-700"
+          >
+            {loading ? "Deleting..." : "Delete"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

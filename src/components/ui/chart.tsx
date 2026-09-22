@@ -1,9 +1,9 @@
-/* eslint-disable no-unused-vars */
+ 
 "use client"
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import type { TooltipProps, LegendProps } from "recharts"
+import type { TooltipProps as _TooltipProps, LegendProps as _LegendProps } from "recharts"
 import { Tooltip, Legend } from "recharts"
 
 import { cn } from "@/lib/utils"
@@ -223,7 +223,7 @@ function ChartTooltipContent({
     >
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
-        {payload.map((item, index) => {
+      {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
           const indicatorColor = color || item.payload?.fill || item.color
@@ -321,7 +321,7 @@ function ChartLegendContent({
         className
       )}
     >
-      {payload.map((item, index) => {
+      {payload.map((item, _index) => {
         const key = `${nameKey || item.dataKey || "value"}`
         const itemConfig = getPayloadConfigFromPayload(config, item, key)
 

@@ -1,5 +1,5 @@
-import connectDb from "@/app/libs/ConnectDb";
-import User from "@/app/models/User";
+import connectDb from "@/lib/ConnectDb";
+import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/authOptions";

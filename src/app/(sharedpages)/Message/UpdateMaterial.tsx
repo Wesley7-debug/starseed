@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { toast } from "sonner";
-import { useUpdateMaterials } from "@/app/hooks/Use-UpdateMat";
+import { useUpdateMaterials } from "@/hooks/Use-UpdateMat";
 
 
 

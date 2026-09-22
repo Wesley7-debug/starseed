@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
+ 
 'use client';
 
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FrontendUser } from '@/app/types/frontendUser';
+import { FrontendUser } from '@/types/frontendUser';
 
 interface Course {
   courseId: string;

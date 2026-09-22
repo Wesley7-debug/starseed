@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useDeleteCourse } from '@/app/hooks/Use-deleteCourse';
+import { useDeleteCourse } from '@/hooks/Use-deleteCourse';
 import { Course } from './page';
 
 interface CourseListProps {

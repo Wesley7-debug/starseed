@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/authOptions";
-import connectDb from "@/app/libs/ConnectDb";
-import Material from "@/app/models/Material";
-import User from "@/app/models/User";
+import connectDb from "@/lib/ConnectDb";
+import Material from "@/models/Material";
+import User from "@/models/User";
 
 // type RouteContext<T extends Record<string, string> = {}> = {
 //   params: T;

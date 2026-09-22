@@ -5,11 +5,12 @@ import { signOut } from 'next-auth/react';
 
 export default function HandleLogout() {
   return (
-    <span className=' cursor-pointer bg-blue-900 flex gap-1 justify-center items-center'
-   
-      onClick={() => signOut({ callbackUrl: '/Login' })}
+    <span
+      className="flex cursor-pointer items-center gap-1.5"
+      onClick={() => signOut({ callbackUrl: "/Login" })}
     >
-     <LogOutIcon /> Logout
+      <LogOutIcon className="size-4" />
+      
     </span>
   );
 }

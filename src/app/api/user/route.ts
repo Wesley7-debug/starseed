@@ -1,54 +1,44 @@
-import connectDb from "@/app/libs/ConnectDb";
-import User from "@/app/models/User";
+import connectDb from "@/lib/ConnectDb";
+import User from "@/models/User";
 import { getServerSession } from "next-auth";
-
-//import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/authOptions";
 
 interface RequestWithUrl extends Request {
-  url: string; // for URL parsing in GET handler
+  url: string;
 }
-
 
 export async function POST(req: Request): Promise<Response> {
   const session = await getServerSession(authOptions);
 
-  // If there's no session, return unauthorized
   if (!session) {
-    return NextResponse.json(
-      { message: "unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const { name, RegNo, classId, role } = await req.json();
 
-    // Check for required fields
     if (!name || !RegNo || !role) {
       return NextResponse.json(
-        { message: "all fields must be available" },
+        { success: false, message: "All fields must be provided" },
         { status: 400 }
       );
     }
 
     await connectDb();
 
-    // Check if RegNo already exists
     const existing = await User.findOne({ RegNo });
     if (existing) {
       return NextResponse.json(
-        { message: "RegNo already exists" },
+        { success: false, message: "Registration number already exists" },
         { status: 409 }
       );
     }
 
-    // Teacher registering a student
     if (session.user.role === "teacher") {
       if (role !== "student") {
         return NextResponse.json(
-          { message: "teachers can only register students" },
+          { success: false, message: "Teachers can only register students" },
           { status: 403 }
         );
       }
@@ -57,20 +47,16 @@ export async function POST(req: Request): Promise<Response> {
         name,
         RegNo,
         role: "student",
-        classId: session.user.classId, // force their own classId
+        classId: session.user.classId,
       });
 
-      return NextResponse.json(
-        { message: "user created", student },
-        { status: 201 }
-      );
+      return NextResponse.json({ success: true, message: "User created", user: student }, { status: 201 });
     }
 
-    // Admin registering any role
     if (session.user.role === "admin") {
       if ((role === "teacher" || role === "student") && !classId) {
         return NextResponse.json(
-          { message: "classId is required for students and teachers" },
+          { success: false, message: "Class ID is required for students and teachers" },
           { status: 400 }
         );
       }
@@ -82,26 +68,16 @@ export async function POST(req: Request): Promise<Response> {
         classId: role === "admin" ? undefined : classId,
       });
 
-      return NextResponse.json(
-        { message: "user created", user },
-        { status: 201 }
-      );
+      return NextResponse.json({ success: true, message: "User created", user }, { status: 201 });
     }
 
-    // If session user is neither teacher nor admin
-    return NextResponse.json(
-      { message: "unauthorized role" },
-      { status: 403 }
-    );
-  }  catch (error) {
+    return NextResponse.json({ success: false, message: "Unauthorized role" }, { status: 403 });
+  } catch (error) {
     console.error("Error adding user:", error);
-    return new Response(JSON.stringify({ message: "Internal server error" }), { status: 500 });
-  };
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+  }
 }
 
-
-
-// GET handler - to fetch users with optional filtering
 export async function GET(req: RequestWithUrl): Promise<Response> {
   try {
     const url = new URL(req.url);
@@ -109,7 +85,6 @@ export async function GET(req: RequestWithUrl): Promise<Response> {
     const classId = url.searchParams.get("classId") ?? undefined;
 
     const filter: Record<string, string> = {};
-
     if (role) filter.role = role;
     if (classId) filter.classId = classId;
 
@@ -117,13 +92,9 @@ export async function GET(req: RequestWithUrl): Promise<Response> {
 
     const users = await User.find(filter);
 
-    return NextResponse.json(
-      { data: users, message: "found all" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: users, message: "Found users" }, { status: 200 });
   } catch (error) {
-    console.error("Error getting user:", error);
-    return new Response(JSON.stringify({ message: "Internal server error" }), { status: 500 });
+    console.error("Error getting users:", error);
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
   }
 }
-

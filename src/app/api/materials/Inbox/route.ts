@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/authOptions";
-import Material, { IMaterial } from "@/app/models/Material";
-import User from "@/app/models/User";
+import Material, { IMaterial } from "@/models/Material";
+import User from "@/models/User";
 import { Types, FilterQuery } from "mongoose";
 
 //gets all materials

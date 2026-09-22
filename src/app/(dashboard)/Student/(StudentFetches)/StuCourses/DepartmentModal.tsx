@@ -1,6 +1,6 @@
 'use client';
 
-import { FrontendUser } from '@/app/types/frontendUser';
+import { FrontendUser } from '@/types/frontendUser';
 import { useEffect, useState } from 'react';
 
 interface DepartmentModalProps {

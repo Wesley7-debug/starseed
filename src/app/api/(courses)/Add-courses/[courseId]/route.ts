@@ -2,9 +2,9 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-import connectDb from "@/app/libs/ConnectDb";
-import Course from "@/app/models/Course";
-import User from "@/app/models/User";
+import connectDb from "@/lib/ConnectDb";
+import Course from "@/models/Course";
+import User from "@/models/User";
 
 // // PATCH: Update a course
 // export async function PATCH(
